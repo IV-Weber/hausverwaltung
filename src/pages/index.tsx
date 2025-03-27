@@ -4,8 +4,11 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Building, Users, Wallet, Wrench, FileText, MessageSquare, Calendar } from "lucide-react";
+import { useRouter } from "next/router";
 
 export default function Home() {
+  const router = useRouter();
+  
   return (
     <>
       <Head>
@@ -25,15 +28,15 @@ export default function Home() {
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2">
                     <Building className="h-5 w-5" />
-                    Immobilien
+                    Liegenschaften
                   </CardTitle>
-                  <CardDescription>Verwalten Sie Ihre Immobilien und Einheiten</CardDescription>
+                  <CardDescription>Verwalten Sie Ihre Liegenschaften und Einheiten</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm">Erfassen und verwalten Sie Gebäude, Wohnungen und Gewerbeeinheiten.</p>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full">Öffnen</Button>
+                  <Button className="w-full" onClick={() => router.push("/liegenschaften")}>Öffnen</Button>
                 </CardFooter>
               </Card>
 
@@ -41,15 +44,15 @@ export default function Home() {
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2">
                     <Users className="h-5 w-5" />
-                    Eigentümer & Mieter
+                    Kontakte
                   </CardTitle>
-                  <CardDescription>Verwalten Sie Personen und Kontakte</CardDescription>
+                  <CardDescription>Verwalten Sie Eigentümer, Mieter und Dienstleister</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm">Erfassen und verwalten Sie Eigentümer, Mieter und deren Kontaktdaten.</p>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full">Öffnen</Button>
+                  <Button className="w-full" onClick={() => router.push("/kontakte")}>Öffnen</Button>
                 </CardFooter>
               </Card>
 
@@ -65,7 +68,7 @@ export default function Home() {
                   <p className="text-sm">Erfassen Sie Hausgeld, Nebenkosten und erstellen Sie Abrechnungen.</p>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full">Öffnen</Button>
+                  <Button className="w-full" onClick={() => router.push("/finanzen")}>Öffnen</Button>
                 </CardFooter>
               </Card>
 
@@ -81,7 +84,7 @@ export default function Home() {
                   <p className="text-sm">Planen und verfolgen Sie Wartungsarbeiten und Reparaturen.</p>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full">Öffnen</Button>
+                  <Button className="w-full" onClick={() => router.push("/instandhaltung")}>Öffnen</Button>
                 </CardFooter>
               </Card>
 
@@ -97,7 +100,7 @@ export default function Home() {
                   <p className="text-sm">Speichern und organisieren Sie Verträge, Protokolle und andere Dokumente.</p>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full">Öffnen</Button>
+                  <Button className="w-full" onClick={() => router.push("/dokumente")}>Öffnen</Button>
                 </CardFooter>
               </Card>
 
@@ -105,15 +108,15 @@ export default function Home() {
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
-                    Versammlungen
+                    Kalender
                   </CardTitle>
-                  <CardDescription>Planen Sie Eigentümerversammlungen</CardDescription>
+                  <CardDescription>Verwalten Sie Termine und Ereignisse</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm">Organisieren Sie Versammlungen, Abstimmungen und Protokolle.</p>
+                  <p className="text-sm">Planen und organisieren Sie Termine, Besichtigungen und Wartungen.</p>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full">Öffnen</Button>
+                  <Button className="w-full" onClick={() => router.push("/kalender")}>Öffnen</Button>
                 </CardFooter>
               </Card>
             </div>

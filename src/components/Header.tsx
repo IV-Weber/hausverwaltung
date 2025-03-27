@@ -22,29 +22,68 @@ const Header = () => {
         </div>
 
         <div className="hidden md:flex items-center space-x-4">
-          <Button variant="ghost" size="sm" className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => router.push("/liegenschaften")}
+          >
             <Building className="h-4 w-4" />
-            <span>Immobilien</span>
+            <span>Liegenschaften</span>
           </Button>
-          <Button variant="ghost" size="sm" className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => router.push("/kontakte")}
+          >
             <Users className="h-4 w-4" />
-            <span>Personen</span>
+            <span>Kontakte</span>
           </Button>
-          <Button variant="ghost" size="sm" className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => router.push("/finanzen")}
+          >
             <Wallet className="h-4 w-4" />
             <span>Finanzen</span>
           </Button>
-          <Button variant="ghost" size="sm" className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => router.push("/instandhaltung")}
+          >
             <Wrench className="h-4 w-4" />
             <span>Instandhaltung</span>
           </Button>
-          <Button variant="ghost" size="sm" className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => router.push("/dokumente")}
+          >
             <FileText className="h-4 w-4" />
             <span>Dokumente</span>
           </Button>
-          <Button variant="ghost" size="sm" className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => router.push("/versammlungen")}
+          >
             <Calendar className="h-4 w-4" />
             <span>Versammlungen</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => router.push("/kalender")}
+          >
+            <Calendar className="h-4 w-4" />
+            <span>Kalender</span>
           </Button>
         </div>
 
@@ -64,29 +103,54 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem className="flex items-center gap-2">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2"
+                  onClick={() => router.push("/liegenschaften")}
+                >
                   <Building className="h-4 w-4" />
-                  <span>Immobilien</span>
+                  <span>Liegenschaften</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2"
+                  onClick={() => router.push("/kontakte")}
+                >
                   <Users className="h-4 w-4" />
-                  <span>Personen</span>
+                  <span>Kontakte</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2"
+                  onClick={() => router.push("/finanzen")}
+                >
                   <Wallet className="h-4 w-4" />
                   <span>Finanzen</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2"
+                  onClick={() => router.push("/instandhaltung")}
+                >
                   <Wrench className="h-4 w-4" />
                   <span>Instandhaltung</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2"
+                  onClick={() => router.push("/dokumente")}
+                >
                   <FileText className="h-4 w-4" />
                   <span>Dokumente</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2">
+                <DropdownMenuItem 
+                  className="flex items-center gap-2"
+                  onClick={() => router.push("/versammlungen")}
+                >
                   <Calendar className="h-4 w-4" />
                   <span>Versammlungen</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center gap-2"
+                  onClick={() => router.push("/kalender")}
+                >
+                  <Calendar className="h-4 w-4" />
+                  <span>Kalender</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
