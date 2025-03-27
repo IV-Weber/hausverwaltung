@@ -9,8 +9,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Haus & WEG Verwaltung</title>
-        <meta name="description" content="Haus und WEG-Verwaltungssoftware" />
+        <title>Immobilienverwaltung</title>
+        <meta name="description" content="Immobilienverwaltungssoftware" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -18,7 +18,7 @@ export default function Home() {
         <Header />
         <main className="flex-1 p-6">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold mb-6">Haus & WEG Verwaltung</h1>
+            <h1 className="text-3xl font-bold mb-6">Immobilienverwaltung</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               <Card className="hover:shadow-lg transition-shadow">

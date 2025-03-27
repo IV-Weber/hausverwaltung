@@ -19,7 +19,6 @@ const Header = () => {
           <div className="cursor-pointer" onClick={() => router.push("/")}>
             <Logo />
           </div>
-          <h1 className="text-xl font-bold hidden md:block">Haus & WEG Verwaltung</h1>
         </div>
 
         <div className="hidden md:flex items-center space-x-4">
