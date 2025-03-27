@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wrench, Tool, AlertTriangle, Plus, Calendar } from "lucide-react";
+import { Wrench, Settings, AlertTriangle, Plus, Calendar } from "lucide-react";
 
 export default function Instandhaltung() {
   return (
@@ -33,7 +33,7 @@ export default function Instandhaltung() {
                     <div className="flex items-center justify-between">
                       <div>
                         <CardTitle className="flex items-center gap-2">
-                          <Tool className="h-5 w-5" />
+                          <Settings className="h-5 w-5" />
                           Wartungen
                         </CardTitle>
                         <CardDescription>Übersicht aller geplanten und durchgeführten Wartungen</CardDescription>
