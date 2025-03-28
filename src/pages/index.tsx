@@ -106,31 +106,42 @@ export default function Dashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-2">
-                  <div className="h-[200px]">
-                    <ChartContainer config={chartConfig}>
-                      <RechartsPieChart>
-                        <Pie
-                          data={propertyTypeData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={renderCustomizedLabel}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {propertyTypeData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Pie>
-                        <Legend />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                      </RechartsPieChart>
-                    </ChartContainer>
-                  </div>
-                  <div className="mt-2 text-center">
-                    <div className="text-3xl font-bold">{metrics.properties}</div>
-                    <p className="text-sm text-muted-foreground">Verwaltete Objekte gesamt</p>
+                  <div className="flex">
+                    <div className="w-1/3 pr-4">
+                      <ul className="space-y-2">
+                        {propertyTypeData.map((item, index) => (
+                          <li key={index} className="flex items-center">
+                            <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.fill }}></div>
+                            <span className="text-sm">{item.name}: {item.value} ({((item.value / metrics.properties) * 100).toFixed(0)}%)</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="mt-4">
+                        <div className="font-bold">Gesamt: {metrics.properties}</div>
+                      </div>
+                    </div>
+                    <div className="w-2/3 h-[200px]">
+                      <ChartContainer config={chartConfig}>
+                        <RechartsPieChart>
+                          <Pie
+                            data={propertyTypeData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={renderCustomizedLabel}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {propertyTypeData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Pie>
+                          <Legend />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                        </RechartsPieChart>
+                      </ChartContainer>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter>
@@ -151,31 +162,42 @@ export default function Dashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-2">
-                  <div className="h-[200px]">
-                    <ChartContainer config={chartConfig}>
-                      <RechartsPieChart>
-                        <Pie
-                          data={contactTypeData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={renderCustomizedLabel}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {contactTypeData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Pie>
-                        <Legend />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                      </RechartsPieChart>
-                    </ChartContainer>
-                  </div>
-                  <div className="mt-2 text-center">
-                    <div className="text-3xl font-bold">{metrics.contacts}</div>
-                    <p className="text-sm text-muted-foreground">Kontakte gesamt</p>
+                  <div className="flex">
+                    <div className="w-1/3 pr-4">
+                      <ul className="space-y-2">
+                        {contactTypeData.map((item, index) => (
+                          <li key={index} className="flex items-center">
+                            <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.fill }}></div>
+                            <span className="text-sm">{item.name}: {item.value} ({((item.value / metrics.contacts) * 100).toFixed(0)}%)</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="mt-4">
+                        <div className="font-bold">Gesamt: {metrics.contacts}</div>
+                      </div>
+                    </div>
+                    <div className="w-2/3 h-[200px]">
+                      <ChartContainer config={chartConfig}>
+                        <RechartsPieChart>
+                          <Pie
+                            data={contactTypeData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={renderCustomizedLabel}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {contactTypeData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Pie>
+                          <Legend />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                        </RechartsPieChart>
+                      </ChartContainer>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter>
@@ -196,31 +218,42 @@ export default function Dashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-2">
-                  <div className="h-[200px]">
-                    <ChartContainer config={chartConfig}>
-                      <RechartsPieChart>
-                        <Pie
-                          data={unitTypeData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={renderCustomizedLabel}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {unitTypeData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Pie>
-                        <Legend />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                      </RechartsPieChart>
-                    </ChartContainer>
-                  </div>
-                  <div className="mt-2 text-center">
-                    <div className="text-3xl font-bold">{metrics.apartments + metrics.commercialUnits}</div>
-                    <p className="text-sm text-muted-foreground">Einheiten gesamt</p>
+                  <div className="flex">
+                    <div className="w-1/3 pr-4">
+                      <ul className="space-y-2">
+                        {unitTypeData.map((item, index) => (
+                          <li key={index} className="flex items-center">
+                            <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.fill }}></div>
+                            <span className="text-sm">{item.name}: {item.value} ({((item.value / (metrics.apartments + metrics.commercialUnits)) * 100).toFixed(0)}%)</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="mt-4">
+                        <div className="font-bold">Gesamt: {metrics.apartments + metrics.commercialUnits}</div>
+                      </div>
+                    </div>
+                    <div className="w-2/3 h-[200px]">
+                      <ChartContainer config={chartConfig}>
+                        <RechartsPieChart>
+                          <Pie
+                            data={unitTypeData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={renderCustomizedLabel}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {unitTypeData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Pie>
+                          <Legend />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                        </RechartsPieChart>
+                      </ChartContainer>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter>
@@ -241,31 +274,42 @@ export default function Dashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-2">
-                  <div className="h-[200px]">
-                    <ChartContainer config={chartConfig}>
-                      <RechartsPieChart>
-                        <Pie
-                          data={occupancyData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={renderCustomizedLabel}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {occupancyData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Pie>
-                        <Legend />
-                        <ChartTooltip content={<ChartTooltipContent />} />
-                      </RechartsPieChart>
-                    </ChartContainer>
-                  </div>
-                  <div className="mt-2 text-center">
-                    <div className="text-3xl font-bold">94%</div>
-                    <p className="text-sm text-muted-foreground">Vermietungsquote gesamt</p>
+                  <div className="flex">
+                    <div className="w-1/3 pr-4">
+                      <ul className="space-y-2">
+                        {occupancyData.map((item, index) => (
+                          <li key={index} className="flex items-center">
+                            <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.fill }}></div>
+                            <span className="text-sm">{item.name}: {item.value} ({((item.value / (metrics.apartments + metrics.commercialUnits)) * 100).toFixed(0)}%)</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="mt-4">
+                        <div className="font-bold">Vermietungsquote: 94%</div>
+                      </div>
+                    </div>
+                    <div className="w-2/3 h-[200px]">
+                      <ChartContainer config={chartConfig}>
+                        <RechartsPieChart>
+                          <Pie
+                            data={occupancyData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={renderCustomizedLabel}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {occupancyData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Pie>
+                          <Legend />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                        </RechartsPieChart>
+                      </ChartContainer>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter>
