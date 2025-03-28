@@ -320,7 +320,7 @@ export default function Dashboard() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="mb-8">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xl flex items-center gap-2">
