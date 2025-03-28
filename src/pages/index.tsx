@@ -33,15 +33,15 @@ export default function Dashboard() {
   ];
 
   const unitTypeData = [
-    { name: "Wohneinheiten", value: 87, fill: "#0ea5e9" },
-    { name: "Gewerbeeinheiten", value: 14, fill: "#8b5cf6" },
+    { name: "WE", value: 87, fill: "#0ea5e9" },
+    { name: "GE", value: 14, fill: "#8b5cf6" },
   ];
 
   const occupancyData = [
-    { name: "Vermietet (Wohneinheiten)", value: 82, fill: "#10b981" },
-    { name: "Leerstand (Wohneinheiten)", value: 5, fill: "#f59e0b" },
-    { name: "Vermietet (Gewerbeeinheiten)", value: 12, fill: "#0ea5e9" },
-    { name: "Leerstand (Gewerbeeinheiten)", value: 2, fill: "#ef4444" },
+    { name: "Vermietet (WE)", value: 82, fill: "#10b981" },
+    { name: "Leerstand (WE)", value: 5, fill: "#f59e0b" },
+    { name: "Vermietet (GE)", value: 12, fill: "#0ea5e9" },
+    { name: "Leerstand (GE)", value: 2, fill: "#ef4444" },
   ];
 
   // Placeholder data for upcoming appointments
@@ -214,7 +214,7 @@ export default function Dashboard() {
                     Einheiten-Grafik
                   </CardTitle>
                   <CardDescription>
-                    Verhältnis von Wohn- zu Gewerbeeinheiten
+                    Verhältnis von WE zu GE
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-2">
@@ -270,7 +270,7 @@ export default function Dashboard() {
                     Auslastungsgrafik
                   </CardTitle>
                   <CardDescription>
-                    Vermietungsquote für Wohn- und Gewerbeeinheiten
+                    Vermietungsquote für WE und GE
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-2">
