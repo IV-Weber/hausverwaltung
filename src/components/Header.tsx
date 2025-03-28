@@ -7,7 +7,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Building, Users, Wallet, Wrench, FileText, Calendar, Menu, Settings, HelpCircle } from 'lucide-react';
+import { Building, Calendar, LayoutDashboard, Archive, Menu, Settings, HelpCircle } from 'lucide-react';
 
 const Header = () => {
   const router = useRouter();
@@ -26,6 +26,15 @@ const Header = () => {
             variant="ghost" 
             size="sm" 
             className="flex items-center gap-1"
+            onClick={() => router.push("/")}
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span>Dashboard</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
             onClick={() => router.push("/liegenschaften")}
           >
             <Building className="h-4 w-4" />
@@ -35,55 +44,19 @@ const Header = () => {
             variant="ghost" 
             size="sm" 
             className="flex items-center gap-1"
-            onClick={() => router.push("/kontakte")}
-          >
-            <Users className="h-4 w-4" />
-            <span>Kontakte</span>
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="flex items-center gap-1"
-            onClick={() => router.push("/finanzen")}
-          >
-            <Wallet className="h-4 w-4" />
-            <span>Finanzen</span>
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="flex items-center gap-1"
-            onClick={() => router.push("/instandhaltung")}
-          >
-            <Wrench className="h-4 w-4" />
-            <span>Instandhaltung</span>
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="flex items-center gap-1"
-            onClick={() => router.push("/dokumente")}
-          >
-            <FileText className="h-4 w-4" />
-            <span>Dokumente</span>
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="flex items-center gap-1"
-            onClick={() => router.push("/versammlungen")}
-          >
-            <Calendar className="h-4 w-4" />
-            <span>Versammlungen</span>
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="flex items-center gap-1"
             onClick={() => router.push("/kalender")}
           >
             <Calendar className="h-4 w-4" />
             <span>Kalender</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => router.push("/archiv")}
+          >
+            <Archive className="h-4 w-4" />
+            <span>Archiv</span>
           </Button>
         </div>
 
@@ -105,6 +78,13 @@ const Header = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem 
                   className="flex items-center gap-2"
+                  onClick={() => router.push("/")}
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center gap-2"
                   onClick={() => router.push("/liegenschaften")}
                 >
                   <Building className="h-4 w-4" />
@@ -112,45 +92,17 @@ const Header = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center gap-2"
-                  onClick={() => router.push("/kontakte")}
-                >
-                  <Users className="h-4 w-4" />
-                  <span>Kontakte</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center gap-2"
-                  onClick={() => router.push("/finanzen")}
-                >
-                  <Wallet className="h-4 w-4" />
-                  <span>Finanzen</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center gap-2"
-                  onClick={() => router.push("/instandhaltung")}
-                >
-                  <Wrench className="h-4 w-4" />
-                  <span>Instandhaltung</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center gap-2"
-                  onClick={() => router.push("/dokumente")}
-                >
-                  <FileText className="h-4 w-4" />
-                  <span>Dokumente</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center gap-2"
-                  onClick={() => router.push("/versammlungen")}
-                >
-                  <Calendar className="h-4 w-4" />
-                  <span>Versammlungen</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center gap-2"
                   onClick={() => router.push("/kalender")}
                 >
                   <Calendar className="h-4 w-4" />
                   <span>Kalender</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center gap-2"
+                  onClick={() => router.push("/archiv")}
+                >
+                  <Archive className="h-4 w-4" />
+                  <span>Archiv</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
