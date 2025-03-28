@@ -92,129 +92,7 @@ export default function Liegenschaften() {
                   </Button>
                 </div>
 
-                {/* Statistics Section */}
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5 text-primary" />
-                      Statistik
-                    </CardTitle>
-                    <CardDescription>
-                      {selectedType === "hausverwaltung" 
-                        ? "Kennzahlen Ihrer Hausverwaltung" 
-                        : "Kennzahlen Ihrer WEG-Verwaltung"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">Immobilien</h3>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Building className="h-4 w-4 text-primary" />
-                              <span>Häuser</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.buildings 
-                                : statistics.wegVerwaltung.buildings}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Home className="h-4 w-4 text-primary" />
-                              <span>Einheiten</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.units 
-                                : statistics.wegVerwaltung.units}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <DoorClosed className="h-4 w-4 text-primary" />
-                              <span>Ø Einheiten pro Haus</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.avgUnitsPerBuilding 
-                                : statistics.wegVerwaltung.avgUnitsPerBuilding}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">Personen</h3>
-                        <div className="space-y-4">
-                          {selectedType === "weg-verwaltung" && (
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <UserCheck className="h-4 w-4 text-primary" />
-                                <span>Eigentümer</span>
-                              </div>
-                              <span className="font-medium">{statistics.wegVerwaltung.owners}</span>
-                            </div>
-                          )}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Users className="h-4 w-4 text-primary" />
-                              <span>Mieter</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.tenants 
-                                : statistics.wegVerwaltung.tenants}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">Nutzung</h3>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="w-3 h-3 rounded-full bg-green-500"></span>
-                              <span>Vermietet</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.rented 
-                                : statistics.wegVerwaltung.rented}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="w-3 h-3 rounded-full bg-red-500"></span>
-                              <span>Leerstand</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.vacant 
-                                : statistics.wegVerwaltung.vacant}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                              <span>Selbstbewohnt</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.selfOccupied 
-                                : statistics.wegVerwaltung.selfOccupied}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Tabs defaultValue="overview" className="w-full">
+                <Tabs defaultValue="overview" className="w-full mb-6">
                   <TabsList className="mb-4">
                     <TabsTrigger value="overview">Übersicht</TabsTrigger>
                     <TabsTrigger value="objects">Objekte</TabsTrigger>
@@ -356,6 +234,128 @@ export default function Liegenschaften() {
                     </TabsContent>
                   )}
                 </Tabs>
+
+                {/* Statistics Section */}
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5 text-primary" />
+                      Statistik
+                    </CardTitle>
+                    <CardDescription>
+                      {selectedType === "hausverwaltung" 
+                        ? "Kennzahlen Ihrer Hausverwaltung" 
+                        : "Kennzahlen Ihrer WEG-Verwaltung"}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">Immobilien</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Building className="h-4 w-4 text-primary" />
+                              <span>Häuser</span>
+                            </div>
+                            <span className="font-medium">
+                              {selectedType === "hausverwaltung" 
+                                ? statistics.hausverwaltung.buildings 
+                                : statistics.wegVerwaltung.buildings}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Home className="h-4 w-4 text-primary" />
+                              <span>Einheiten</span>
+                            </div>
+                            <span className="font-medium">
+                              {selectedType === "hausverwaltung" 
+                                ? statistics.hausverwaltung.units 
+                                : statistics.wegVerwaltung.units}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <DoorClosed className="h-4 w-4 text-primary" />
+                              <span>Ø Einheiten pro Haus</span>
+                            </div>
+                            <span className="font-medium">
+                              {selectedType === "hausverwaltung" 
+                                ? statistics.hausverwaltung.avgUnitsPerBuilding 
+                                : statistics.wegVerwaltung.avgUnitsPerBuilding}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">Personen</h3>
+                        <div className="space-y-4">
+                          {selectedType === "weg-verwaltung" && (
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <UserCheck className="h-4 w-4 text-primary" />
+                                <span>Eigentümer</span>
+                              </div>
+                              <span className="font-medium">{statistics.wegVerwaltung.owners}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Users className="h-4 w-4 text-primary" />
+                              <span>Mieter</span>
+                            </div>
+                            <span className="font-medium">
+                              {selectedType === "hausverwaltung" 
+                                ? statistics.hausverwaltung.tenants 
+                                : statistics.wegVerwaltung.tenants}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-medium mb-4">Nutzung</h3>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                              <span>Vermietet</span>
+                            </div>
+                            <span className="font-medium">
+                              {selectedType === "hausverwaltung" 
+                                ? statistics.hausverwaltung.rented 
+                                : statistics.wegVerwaltung.rented}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                              <span>Leerstand</span>
+                            </div>
+                            <span className="font-medium">
+                              {selectedType === "hausverwaltung" 
+                                ? statistics.hausverwaltung.vacant 
+                                : statistics.wegVerwaltung.vacant}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                              <span>Selbstbewohnt</span>
+                            </div>
+                            <span className="font-medium">
+                              {selectedType === "hausverwaltung" 
+                                ? statistics.hausverwaltung.selfOccupied 
+                                : statistics.wegVerwaltung.selfOccupied}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </div>
