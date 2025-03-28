@@ -3,8 +3,10 @@ import Head from "next/head";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Building, Users, FileText, Calendar, Home, Store, BarChart3 } from "lucide-react";
+import { Building, Users, FileText, Calendar, Home, Store, BarChart3, PieChart } from "lucide-react";
 import { useRouter } from "next/router";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Cell, Legend, Pie, PieChart as RechartsPieChart, ResponsiveContainer } from "recharts";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -18,12 +20,65 @@ export default function Dashboard() {
     archivedDocuments: 243,
   };
 
+  // Placeholder data for pie charts
+  const propertyTypeData = [
+    { name: "WEG-Verwaltung", value: 7, fill: "#0ea5e9" },
+    { name: "Hausverwaltung", value: 5, fill: "#8b5cf6" },
+  ];
+
+  const contactTypeData = [
+    { name: "Eigentümer", value: 68, fill: "#10b981" },
+    { name: "Mieter", value: 76, fill: "#f59e0b" },
+    { name: "Dienstleister", value: 12, fill: "#ef4444" },
+  ];
+
+  const unitTypeData = [
+    { name: "Wohneinheiten", value: 87, fill: "#0ea5e9" },
+    { name: "Gewerbeeinheiten", value: 14, fill: "#8b5cf6" },
+  ];
+
+  const occupancyData = [
+    { name: "Vermietet (Wohneinheiten)", value: 82, fill: "#10b981" },
+    { name: "Leerstand (Wohneinheiten)", value: 5, fill: "#f59e0b" },
+    { name: "Vermietet (Gewerbeeinheiten)", value: 12, fill: "#0ea5e9" },
+    { name: "Leerstand (Gewerbeeinheiten)", value: 2, fill: "#ef4444" },
+  ];
+
   // Placeholder data for upcoming appointments
   const upcomingAppointments = [
     { id: 1, title: "Eigentümerversammlung", date: "30.03.2025", time: "14:00", location: "Musterstraße 1" },
     { id: 2, title: "Wartung Heizungsanlage", date: "02.04.2025", time: "09:30", location: "Beispielweg 5" },
     { id: 3, title: "Besichtigung Wohnung 4B", date: "05.04.2025", time: "11:00", location: "Testplatz 8" },
   ];
+
+  // Chart configuration
+  const chartConfig = {
+    property: { label: "Liegenschaften" },
+    contact: { label: "Kontakte" },
+    unit: { label: "Einheiten" },
+    occupancy: { label: "Auslastung" },
+  };
+
+  // Custom render for pie chart labels
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name, value }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="#fff" 
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central"
+        className="text-xs font-medium"
+      >
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
 
   return (
     <>
@@ -39,53 +94,44 @@ export default function Dashboard() {
           <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xl flex items-center gap-2">
                     <Building className="h-5 w-5 text-primary" />
-                    Liegenschaften
+                    Liegenschaftsübersicht
                   </CardTitle>
+                  <CardDescription>
+                    Verhältnis zwischen WEG- und Hausverwaltungen
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{metrics.properties}</div>
-                  <p className="text-sm text-muted-foreground">Verwaltete Objekte</p>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full" onClick={() => router.push("/liegenschaften")}>
-                    Details anzeigen
-                  </Button>
-                </CardFooter>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xl flex items-center gap-2">
-                    <Home className="h-5 w-5 text-primary" />
-                    Wohnungen
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{metrics.apartments}</div>
-                  <p className="text-sm text-muted-foreground">Wohneinheiten gesamt</p>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full" onClick={() => router.push("/liegenschaften")}>
-                    Details anzeigen
-                  </Button>
-                </CardFooter>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xl flex items-center gap-2">
-                    <Store className="h-5 w-5 text-primary" />
-                    Gewerbeeinheiten
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{metrics.commercialUnits}</div>
-                  <p className="text-sm text-muted-foreground">Gewerbeeinheiten gesamt</p>
+                <CardContent className="pt-2">
+                  <div className="h-[200px]">
+                    <ChartContainer config={chartConfig}>
+                      <RechartsPieChart>
+                        <Pie
+                          data={propertyTypeData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={renderCustomizedLabel}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {propertyTypeData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <Legend />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                      </RechartsPieChart>
+                    </ChartContainer>
+                  </div>
+                  <div className="mt-2 text-center">
+                    <div className="text-3xl font-bold">{metrics.properties}</div>
+                    <p className="text-sm text-muted-foreground">Verwaltete Objekte gesamt</p>
+                  </div>
                 </CardContent>
                 <CardFooter>
                   <Button variant="outline" className="w-full" onClick={() => router.push("/liegenschaften")}>
@@ -98,12 +144,39 @@ export default function Dashboard() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xl flex items-center gap-2">
                     <Users className="h-5 w-5 text-primary" />
-                    Kontakte
+                    Kontaktübersicht
                   </CardTitle>
+                  <CardDescription>
+                    Verhältnis zwischen Mietern, Eigentümern und Dienstleistern
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{metrics.contacts}</div>
-                  <p className="text-sm text-muted-foreground">Eigentümer und Mieter</p>
+                <CardContent className="pt-2">
+                  <div className="h-[200px]">
+                    <ChartContainer config={chartConfig}>
+                      <RechartsPieChart>
+                        <Pie
+                          data={contactTypeData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={renderCustomizedLabel}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {contactTypeData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <Legend />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                      </RechartsPieChart>
+                    </ChartContainer>
+                  </div>
+                  <div className="mt-2 text-center">
+                    <div className="text-3xl font-bold">{metrics.contacts}</div>
+                    <p className="text-sm text-muted-foreground">Kontakte gesamt</p>
+                  </div>
                 </CardContent>
                 <CardFooter>
                   <Button variant="outline" className="w-full" onClick={() => router.push("/kontakte")}>
@@ -115,16 +188,43 @@ export default function Dashboard() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xl flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-primary" />
-                    Archivierte Dokumente
+                    <Home className="h-5 w-5 text-primary" />
+                    Einheiten-Grafik
                   </CardTitle>
+                  <CardDescription>
+                    Verhältnis von Wohn- zu Gewerbeeinheiten
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">{metrics.archivedDocuments}</div>
-                  <p className="text-sm text-muted-foreground">Dokumente gesamt</p>
+                <CardContent className="pt-2">
+                  <div className="h-[200px]">
+                    <ChartContainer config={chartConfig}>
+                      <RechartsPieChart>
+                        <Pie
+                          data={unitTypeData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={renderCustomizedLabel}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {unitTypeData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <Legend />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                      </RechartsPieChart>
+                    </ChartContainer>
+                  </div>
+                  <div className="mt-2 text-center">
+                    <div className="text-3xl font-bold">{metrics.apartments + metrics.commercialUnits}</div>
+                    <p className="text-sm text-muted-foreground">Einheiten gesamt</p>
+                  </div>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="outline" className="w-full" onClick={() => router.push("/archiv")}>
+                  <Button variant="outline" className="w-full" onClick={() => router.push("/liegenschaften")}>
                     Details anzeigen
                   </Button>
                 </CardFooter>
@@ -134,16 +234,70 @@ export default function Dashboard() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xl flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-primary" />
-                    Auslastung
+                    Auslastungsgrafik
                   </CardTitle>
+                  <CardDescription>
+                    Vermietungsquote für Wohn- und Gewerbeeinheiten
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">94%</div>
-                  <p className="text-sm text-muted-foreground">Vermietungsquote</p>
+                <CardContent className="pt-2">
+                  <div className="h-[200px]">
+                    <ChartContainer config={chartConfig}>
+                      <RechartsPieChart>
+                        <Pie
+                          data={occupancyData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={renderCustomizedLabel}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {occupancyData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ))}
+                        </Pie>
+                        <Legend />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                      </RechartsPieChart>
+                    </ChartContainer>
+                  </div>
+                  <div className="mt-2 text-center">
+                    <div className="text-3xl font-bold">94%</div>
+                    <p className="text-sm text-muted-foreground">Vermietungsquote gesamt</p>
+                  </div>
                 </CardContent>
                 <CardFooter>
                   <Button variant="outline" className="w-full" onClick={() => router.push("/liegenschaften")}>
                     Details anzeigen
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
+                    Dokumenten-Archiv
+                  </CardTitle>
+                  <CardDescription>
+                    Gesamtzahl aller gespeicherten Dateien
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-center py-6">
+                    <div className="text-center">
+                      <div className="text-5xl font-bold">{metrics.archivedDocuments}</div>
+                      <p className="text-sm text-muted-foreground mt-2">Archivierte Dokumente</p>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full" onClick={() => router.push("/archiv")}>
+                    Zum Archiv
                   </Button>
                 </CardFooter>
               </Card>
