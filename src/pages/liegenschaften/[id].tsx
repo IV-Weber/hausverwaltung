@@ -291,7 +291,7 @@ export default function PropertyDetail() {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {type === "hausverwaltung" ? "Monatliche Miete" : "Monatliche Umlage"}
+                      {type === "hausverwaltung" ? "Monatliche Miete" : "Hausgeldzahlungen"}
                     </p>
                     <p className="font-medium">
                       {type === "hausverwaltung" 
@@ -299,22 +299,30 @@ export default function PropertyDetail() {
                         : `${property.monthlyFee} €`}
                     </p>
                   </div>
-                  {type === "hausverwaltung" && (
-                    <>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Verkehrswert</p>
-                        <p className="font-medium">1.850.000 €</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Rendite</p>
-                        <p className="font-medium">4,2 %</p>
-                      </div>
-                    </>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Verkehrswert</p>
+                    <p className="font-medium">1.850.000 €</p>
+                  </div>
+                  {type === "hausverwaltung" ? (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Rendite</p>
+                      <p className="font-medium">4,2 %</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Miteigentumsanteile</p>
+                      <p className="font-medium">1000/1000</p>
+                    </div>
                   )}
-                  {type === "hausverwaltung" && property.owner && (
+                  {type === "hausverwaltung" && property.owner ? (
                     <div>
                       <p className="text-sm text-muted-foreground">Eigentümer</p>
                       <p className="font-medium">{property.owner}</p>
+                    </div>
+                  ) : type === "wegVerwaltung" && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Anzahl Eigentümer</p>
+                      <p className="font-medium">{property.units}</p>
                     </div>
                   )}
                 </div>
@@ -524,7 +532,9 @@ export default function PropertyDetail() {
                                 </div>
                                 
                                 <div className="flex justify-between">
-                                  <span className="text-sm text-muted-foreground">Kaltmiete</span>
+                                  <span className="text-sm text-muted-foreground">
+                                    {type === "wegVerwaltung" ? "Hausgeld" : "Kaltmiete"}
+                                  </span>
                                   <span className="text-sm font-medium">{unit.baseRent} €</span>
                                 </div>
                                 

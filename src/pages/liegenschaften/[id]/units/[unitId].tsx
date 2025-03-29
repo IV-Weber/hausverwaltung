@@ -385,9 +385,12 @@ export default function UnitDetail() {
               )}
             </div>
             
-            <Tabs defaultValue="tenant" className="w-full">
+            <Tabs defaultValue={type === "wegVerwaltung" ? "owner" : "tenant"} className="w-full">
               <TabsList className="mb-4">
                 <TabsTrigger value="tenant">Mieter</TabsTrigger>
+                {type === "wegVerwaltung" && (
+                  <TabsTrigger value="owner">Eigentümer</TabsTrigger>
+                )}
                 <TabsTrigger value="meters">Zählerstände</TabsTrigger>
                 <TabsTrigger value="documents">Dokumente</TabsTrigger>
                 <TabsTrigger value="notes">Notizen</TabsTrigger>
@@ -462,6 +465,98 @@ export default function UnitDetail() {
                   </CardFooter>
                 </Card>
               </TabsContent>
+              
+              {type === "wegVerwaltung" && (
+                <TabsContent value="owner">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Eigentümerdaten</CardTitle>
+                      <CardDescription>
+                        Informationen zum Eigentümer dieser Einheit
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="owner-name">Name</Label>
+                            <Input 
+                              id="owner-name" 
+                              defaultValue={unit.owner || ""} 
+                              placeholder="Name des Eigentümers"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="owner-address">Adresse</Label>
+                            <Input 
+                              id="owner-address" 
+                              placeholder="Adresse des Eigentümers"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="owner-email">E-Mail</Label>
+                            <Input 
+                              id="owner-email" 
+                              type="email" 
+                              placeholder="E-Mail-Adresse"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="owner-phone">Telefon</Label>
+                            <Input 
+                              id="owner-phone" 
+                              placeholder="Telefonnummer"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="owner-fee">Monatliche Hausgeldzahlungen (€)</Label>
+                            <Input 
+                              id="owner-fee" 
+                              type="number"
+                              defaultValue={unit.additionalCosts || 0}
+                              placeholder="Monatliche Hausgeldzahlungen"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="owner-share">Miteigentumsanteil</Label>
+                            <Input 
+                              id="owner-share" 
+                              placeholder="z.B. 125/1000"
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="owner-since">Eigentümer seit</Label>
+                              <Input 
+                                id="owner-since" 
+                                type="date"
+                                placeholder="Eigentümer seit"
+                              />
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="owner-bank">Bankverbindung</Label>
+                              <Input 
+                                id="owner-bank" 
+                                placeholder="IBAN"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button>Speichern</Button>
+                    </CardFooter>
+                  </Card>
+                </TabsContent>
+              )}
               
               <TabsContent value="meters">
                 <Card>
