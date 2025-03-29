@@ -350,6 +350,10 @@ export default function UnitDetail() {
                       <span className="text-muted-foreground">Zimmer</span>
                       <span className="font-medium">{unit.rooms}</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Mieter/Bewohner</span>
+                      <span className="font-medium">{showTenantInfo ? (tenantName || "Nicht angegeben") : (unitStatus === "self-occupied" ? ownerName : "Nicht angegeben")}</span>
+                    </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Status</span>
                       <Select 
@@ -376,8 +380,16 @@ export default function UnitDetail() {
                       <span className="font-medium">{unit.additionalCosts} €</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Gesamtmiete</span>
-                      <span className="font-medium">{unit.baseRent + unit.additionalCosts} €</span>
+                      <span className="text-muted-foreground">Eigentümer</span>
+                      <span className="font-medium">{ownerName || unit.owner || "Nicht angegeben"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Hausgeld</span>
+                      <span className="font-medium">{unit.additionalCosts} €</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Miteigentumsanteile</span>
+                      <span className="font-medium">-</span>
                     </div>
                   </div>
                 </CardContent>
@@ -475,6 +487,8 @@ export default function UnitDetail() {
                 )}
                 <TabsTrigger value="owner">Eigentümer</TabsTrigger>
                 <TabsTrigger value="meters">Zählerstände</TabsTrigger>
+                <TabsTrigger value="finances">Finanzen</TabsTrigger>
+                <TabsTrigger value="statements">Abrechnungen</TabsTrigger>
                 <TabsTrigger value="documents">Dokumente</TabsTrigger>
                 <TabsTrigger value="notes">Notizen</TabsTrigger>
               </TabsList>
@@ -1051,6 +1065,161 @@ export default function UnitDetail() {
                     <div className="text-center py-8">
                       <p className="text-muted-foreground mb-4">Keine Dokumente vorhanden</p>
                       <Button>Dokument hinzufügen</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="finances">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Hausgelder</CardTitle>
+                    <CardDescription>
+                      Übersicht der Hausgeldzahlungen für diese Einheit
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">Monatliches Hausgeld</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-3xl font-bold">{unit.additionalCosts} €</p>
+                          <p className="text-sm text-muted-foreground">Aktueller Monat</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">Jährliches Hausgeld</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-3xl font-bold">{unit.additionalCosts * 12} €</p>
+                          <p className="text-sm text-muted-foreground">Aktuelles Jahr</p>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">Miteigentumsanteil</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-3xl font-bold">-</p>
+                          <p className="text-sm text-muted-foreground">Anteil an der Gesamtanlage</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-medium">Hausgeldhistorie</h3>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Datum</TableHead>
+                            <TableHead>Betrag</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Notizen</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>01.03.2025</TableCell>
+                            <TableCell>{unit.additionalCosts} €</TableCell>
+                            <TableCell>Bezahlt</TableCell>
+                            <TableCell>-</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>01.02.2025</TableCell>
+                            <TableCell>{unit.additionalCosts} €</TableCell>
+                            <TableCell>Bezahlt</TableCell>
+                            <TableCell>-</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>01.01.2025</TableCell>
+                            <TableCell>{unit.additionalCosts} €</TableCell>
+                            <TableCell>Bezahlt</TableCell>
+                            <TableCell>-</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="statements">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Abrechnungen</CardTitle>
+                    <CardDescription>
+                      Abrechnungen für diese Einheit
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-medium">Verfügbare Abrechnungen</h3>
+                        <Select defaultValue="all">
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Alle Typen" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Alle Typen</SelectItem>
+                            <SelectItem value="betriebskosten">Betriebskosten</SelectItem>
+                            <SelectItem value="heizkosten">Heizkosten</SelectItem>
+                            <SelectItem value="wirtschaftsplan">Wirtschaftsplan</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Typ</TableHead>
+                            <TableHead>Jahr</TableHead>
+                            <TableHead>Datum</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Aktionen</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>Betriebskosten</TableCell>
+                            <TableCell>2024</TableCell>
+                            <TableCell>15.03.2025</TableCell>
+                            <TableCell>Erstellt</TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="outline" size="sm">Anzeigen</Button>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Heizkosten</TableCell>
+                            <TableCell>2024</TableCell>
+                            <TableCell>15.03.2025</TableCell>
+                            <TableCell>Erstellt</TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="outline" size="sm">Anzeigen</Button>
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Wirtschaftsplan</TableCell>
+                            <TableCell>2025</TableCell>
+                            <TableCell>01.12.2024</TableCell>
+                            <TableCell>Genehmigt</TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="outline" size="sm">Anzeigen</Button>
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                      
+                      <div className="flex justify-end">
+                        <Button>
+                          <Plus className="mr-2 h-4 w-4" />
+                          Abrechnung hinzufügen
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
