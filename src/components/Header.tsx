@@ -7,7 +7,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
-import { Building, Calendar, LayoutDashboard, Archive, Menu, Settings, HelpCircle } from 'lucide-react';
+import { Building, Calendar, LayoutDashboard, Archive, Menu, Settings, HelpCircle, Users } from 'lucide-react';
 
 const Header = () => {
   const router = useRouter();
@@ -39,6 +39,15 @@ const Header = () => {
           >
             <Building className="h-4 w-4" />
             <span>Liegenschaften</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => router.push("/kontakte")}
+          >
+            <Users className="h-4 w-4" />
+            <span>Kontakte</span>
           </Button>
           <Button 
             variant="ghost" 
@@ -89,6 +98,13 @@ const Header = () => {
                 >
                   <Building className="h-4 w-4" />
                   <span>Liegenschaften</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center gap-2"
+                  onClick={() => router.push("/kontakte")}
+                >
+                  <Users className="h-4 w-4" />
+                  <span>Kontakte</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center gap-2"

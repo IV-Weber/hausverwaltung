@@ -24,7 +24,7 @@ export default function Kontakte() {
             <h1 className="text-3xl font-bold mb-6">Kontakte</h1>
 
             {!selectedType ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedType("eigentuemer")}>
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2">
@@ -56,12 +56,32 @@ export default function Kontakte() {
                     <Button className="w-full">Auswählen</Button>
                   </CardFooter>
                 </Card>
+                
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedType("dienstleister")}>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2">
+                      <Building className="h-5 w-5" />
+                      Dienstleister
+                    </CardTitle>
+                    <CardDescription>Verwaltung von Dienstleistern</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm">Verwalten Sie Dienstleister und deren Kontaktdaten.</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button className="w-full">Auswählen</Button>
+                  </CardFooter>
+                </Card>
               </div>
             ) : (
               <div>
                 <div className="mb-6 flex items-center justify-between">
                   <h2 className="text-2xl font-semibold">
-                    {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"}
+                    {selectedType === "eigentuemer" 
+                      ? "Eigentümer" 
+                      : selectedType === "mieter" 
+                        ? "Mieter" 
+                        : "Dienstleister"}
                   </h2>
                   <Button variant="outline" onClick={() => setSelectedType(null)}>
                     Zurück zur Auswahl
@@ -78,19 +98,35 @@ export default function Kontakte() {
                   <TabsContent value="all">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Alle {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"}</CardTitle>
+                        <CardTitle>Alle {selectedType === "eigentuemer" 
+                          ? "Eigentümer" 
+                          : selectedType === "mieter" 
+                            ? "Mieter" 
+                            : "Dienstleister"}</CardTitle>
                         <CardDescription>
-                          Übersicht aller {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"}
+                          Übersicht aller {selectedType === "eigentuemer" 
+                          ? "Eigentümer" 
+                          : selectedType === "mieter" 
+                            ? "Mieter" 
+                            : "Dienstleister"}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="text-center py-8">
                           <Users className="h-12 w-12 mx-auto text-muted-foreground" />
                           <p className="mt-4 text-muted-foreground">
-                            Keine {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"} vorhanden
+                            Keine {selectedType === "eigentuemer" 
+                              ? "Eigentümer" 
+                              : selectedType === "mieter" 
+                                ? "Mieter" 
+                                : "Dienstleister"} vorhanden
                           </p>
                           <Button className="mt-4">
-                            {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"} hinzufügen
+                            {selectedType === "eigentuemer" 
+                              ? "Eigentümer" 
+                              : selectedType === "mieter" 
+                                ? "Mieter" 
+                                : "Dienstleister"} hinzufügen
                           </Button>
                         </div>
                       </CardContent>
@@ -100,19 +136,35 @@ export default function Kontakte() {
                   <TabsContent value="active">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Aktive {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"}</CardTitle>
+                        <CardTitle>Aktive {selectedType === "eigentuemer" 
+                          ? "Eigentümer" 
+                          : selectedType === "mieter" 
+                            ? "Mieter" 
+                            : "Dienstleister"}</CardTitle>
                         <CardDescription>
-                          Übersicht aktiver {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"}
+                          Übersicht aktiver {selectedType === "eigentuemer" 
+                          ? "Eigentümer" 
+                          : selectedType === "mieter" 
+                            ? "Mieter" 
+                            : "Dienstleister"}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="text-center py-8">
                           <Users className="h-12 w-12 mx-auto text-muted-foreground" />
                           <p className="mt-4 text-muted-foreground">
-                            Keine aktiven {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"} vorhanden
+                            Keine aktiven {selectedType === "eigentuemer" 
+                              ? "Eigentümer" 
+                              : selectedType === "mieter" 
+                                ? "Mieter" 
+                                : "Dienstleister"} vorhanden
                           </p>
                           <Button className="mt-4">
-                            {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"} hinzufügen
+                            {selectedType === "eigentuemer" 
+                              ? "Eigentümer" 
+                              : selectedType === "mieter" 
+                                ? "Mieter" 
+                                : "Dienstleister"} hinzufügen
                           </Button>
                         </div>
                       </CardContent>
@@ -122,16 +174,28 @@ export default function Kontakte() {
                   <TabsContent value="inactive">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Inaktive {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"}</CardTitle>
+                        <CardTitle>Inaktive {selectedType === "eigentuemer" 
+                          ? "Eigentümer" 
+                          : selectedType === "mieter" 
+                            ? "Mieter" 
+                            : "Dienstleister"}</CardTitle>
                         <CardDescription>
-                          Übersicht inaktiver {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"}
+                          Übersicht inaktiver {selectedType === "eigentuemer" 
+                          ? "Eigentümer" 
+                          : selectedType === "mieter" 
+                            ? "Mieter" 
+                            : "Dienstleister"}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="text-center py-8">
                           <Users className="h-12 w-12 mx-auto text-muted-foreground" />
                           <p className="mt-4 text-muted-foreground">
-                            Keine inaktiven {selectedType === "eigentuemer" ? "Eigentümer" : "Mieter"} vorhanden
+                            Keine inaktiven {selectedType === "eigentuemer" 
+                              ? "Eigentümer" 
+                              : selectedType === "mieter" 
+                                ? "Mieter" 
+                                : "Dienstleister"} vorhanden
                           </p>
                         </div>
                       </CardContent>

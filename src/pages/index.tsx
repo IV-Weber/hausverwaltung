@@ -211,7 +211,7 @@ export default function Dashboard() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xl flex items-center gap-2">
                     <Home className="h-5 w-5 text-primary" />
-                    Einheiten-Grafik
+                    Einheitenübersicht
                   </CardTitle>
                   <CardDescription>
                     Verhältnis von WE zu GE
@@ -267,7 +267,7 @@ export default function Dashboard() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-xl flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-primary" />
-                    Auslastungsgrafik
+                    Auslastungen
                   </CardTitle>
                   <CardDescription>
                     Vermietungsquote für WE und GE
