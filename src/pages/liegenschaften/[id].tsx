@@ -1098,39 +1098,32 @@ export default function PropertyDetail() {
                             </Select>
                           </div>
                           <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="statement-year" className="text-right">
-                              Abrechnungsjahr
-                            </Label>
-                            <Select>
-                              <SelectTrigger className="col-span-3">
-                                <SelectValue placeholder="Jahr auswählen" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="2025">2025</SelectItem>
-                                <SelectItem value="2024">2024</SelectItem>
-                                <SelectItem value="2023">2023</SelectItem>
-                                <SelectItem value="2022">2022</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="statement-period" className="text-right">
+                            <Label htmlFor="statement-period-start" className="text-right">
                               Abrechnungszeitraum
                             </Label>
-                            <Select>
-                              <SelectTrigger className="col-span-3">
-                                <SelectValue placeholder="Zeitraum auswählen" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="full-year">Gesamtes Jahr</SelectItem>
-                                <SelectItem value="q1">1. Quartal</SelectItem>
-                                <SelectItem value="q2">2. Quartal</SelectItem>
-                                <SelectItem value="q3">3. Quartal</SelectItem>
-                                <SelectItem value="q4">4. Quartal</SelectItem>
-                                <SelectItem value="h1">1. Halbjahr</SelectItem>
-                                <SelectItem value="h2">2. Halbjahr</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <div className="col-span-3 flex items-center gap-2">
+                              <div className="flex-1">
+                                <Label htmlFor="statement-period-start" className="sr-only">
+                                  Von
+                                </Label>
+                                <Input
+                                  id="statement-period-start"
+                                  type="date"
+                                  placeholder="Von"
+                                />
+                              </div>
+                              <span className="text-muted-foreground">bis</span>
+                              <div className="flex-1">
+                                <Label htmlFor="statement-period-end" className="sr-only">
+                                  Bis
+                                </Label>
+                                <Input
+                                  id="statement-period-end"
+                                  type="date"
+                                  placeholder="Bis"
+                                />
+                              </div>
+                            </div>
                           </div>
                           <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="statement-title" className="text-right">
@@ -1194,20 +1187,32 @@ export default function PropertyDetail() {
                               </Select>
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="statement-year" className="text-right">
-                                Abrechnungsjahr
+                              <Label htmlFor="statement-period-start-2" className="text-right">
+                                Abrechnungszeitraum
                               </Label>
-                              <Select>
-                                <SelectTrigger className="col-span-3">
-                                  <SelectValue placeholder="Jahr auswählen" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="2025">2025</SelectItem>
-                                  <SelectItem value="2024">2024</SelectItem>
-                                  <SelectItem value="2023">2023</SelectItem>
-                                  <SelectItem value="2022">2022</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <div className="col-span-3 flex items-center gap-2">
+                                <div className="flex-1">
+                                  <Label htmlFor="statement-period-start-2" className="sr-only">
+                                    Von
+                                  </Label>
+                                  <Input
+                                    id="statement-period-start-2"
+                                    type="date"
+                                    placeholder="Von"
+                                  />
+                                </div>
+                                <span className="text-muted-foreground">bis</span>
+                                <div className="flex-1">
+                                  <Label htmlFor="statement-period-end-2" className="sr-only">
+                                    Bis
+                                  </Label>
+                                  <Input
+                                    id="statement-period-end-2"
+                                    type="date"
+                                    placeholder="Bis"
+                                  />
+                                </div>
+                              </div>
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
                               <Label htmlFor="statement-title" className="text-right">
