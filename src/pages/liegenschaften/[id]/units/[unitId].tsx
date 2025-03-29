@@ -434,6 +434,26 @@ export default function UnitDetail() {
                             placeholder="Telefonnummer"
                           />
                         </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="tenant-start-date">Mietbeginn</Label>
+                            <Input 
+                              id="tenant-start-date" 
+                              type="date"
+                              placeholder="Mietbeginn"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="tenant-end-date">Mietende</Label>
+                            <Input 
+                              id="tenant-end-date" 
+                              type="date"
+                              placeholder="Mietende"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

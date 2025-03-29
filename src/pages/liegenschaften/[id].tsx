@@ -293,6 +293,18 @@ export default function PropertyDetail() {
                         : `${property.monthlyFee} €`}
                     </p>
                   </div>
+                  {type === "hausverwaltung" && (
+                    <>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Verkehrswert</p>
+                        <p className="font-medium">1.850.000 €</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Rendite</p>
+                        <p className="font-medium">4,2 %</p>
+                      </div>
+                    </>
+                  )}
                   {type === "hausverwaltung" && property.owner && (
                     <div>
                       <p className="text-sm text-muted-foreground">Eigentümer</p>
@@ -646,7 +658,80 @@ export default function PropertyDetail() {
                     <div className="text-center py-8">
                       <Building className="h-12 w-12 mx-auto text-muted-foreground" />
                       <p className="mt-4 text-muted-foreground">Keine Instandhaltungsmaßnahmen vorhanden</p>
-                      <Button className="mt-4">Maßnahme hinzufügen</Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button className="mt-4">Maßnahme hinzufügen</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Neue Instandhaltungsmaßnahme hinzufügen</DialogTitle>
+                            <DialogDescription>
+                              Fügen Sie eine neue Instandhaltungsmaßnahme für diese Liegenschaft hinzu.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="maintenance-title" className="text-right">
+                                Titel
+                              </Label>
+                              <Input
+                                id="maintenance-title"
+                                placeholder="z.B. Fassadenrenovierung"
+                                className="col-span-3"
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="maintenance-date" className="text-right">
+                                Datum
+                              </Label>
+                              <Input
+                                id="maintenance-date"
+                                type="date"
+                                className="col-span-3"
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="maintenance-cost" className="text-right">
+                                Kosten (€)
+                              </Label>
+                              <Input
+                                id="maintenance-cost"
+                                type="number"
+                                placeholder="0.00"
+                                className="col-span-3"
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="maintenance-status" className="text-right">
+                                Status
+                              </Label>
+                              <Select defaultValue="planned">
+                                <SelectTrigger className="col-span-3">
+                                  <SelectValue placeholder="Status auswählen" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="planned">Geplant</SelectItem>
+                                  <SelectItem value="in-progress">In Bearbeitung</SelectItem>
+                                  <SelectItem value="completed">Abgeschlossen</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="maintenance-description" className="text-right">
+                                Beschreibung
+                              </Label>
+                              <Textarea
+                                id="maintenance-description"
+                                placeholder="Detaillierte Beschreibung der Maßnahme"
+                                className="col-span-3 min-h-[100px]"
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button type="submit">Maßnahme hinzufügen</Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </CardContent>
                 </Card>
@@ -679,12 +764,38 @@ export default function PropertyDetail() {
                         <div className="pt-4">
                           <h3 className="text-lg font-medium mb-2">Einnahmen nach Einheiten</h3>
                           <div className="space-y-2">
-                            {property.units_list.map((unit) => (
-                              <div key={unit.id} className="flex justify-between items-center p-2 border-b">
-                                <span>{unit.name}</span>
-                                <span className="font-medium">{unit.baseRent + unit.additionalCosts} €</span>
-                              </div>
-                            ))}
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Einheit</TableHead>
+                                  <TableHead>Kaltmiete</TableHead>
+                                  <TableHead>Nebenkosten</TableHead>
+                                  <TableHead>Gesamt</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {property.units_list.map((unit) => (
+                                  <TableRow key={unit.id}>
+                                    <TableCell className="font-medium">{unit.name}</TableCell>
+                                    <TableCell>{unit.baseRent} €</TableCell>
+                                    <TableCell>{unit.additionalCosts} €</TableCell>
+                                    <TableCell className="font-medium">{unit.baseRent + unit.additionalCosts} €</TableCell>
+                                  </TableRow>
+                                ))}
+                                <TableRow>
+                                  <TableCell className="font-bold">Gesamt</TableCell>
+                                  <TableCell className="font-bold">
+                                    {property.units_list.reduce((sum, unit) => sum + unit.baseRent, 0)} €
+                                  </TableCell>
+                                  <TableCell className="font-bold">
+                                    {property.units_list.reduce((sum, unit) => sum + unit.additionalCosts, 0)} €
+                                  </TableCell>
+                                  <TableCell className="font-bold">
+                                    {property.units_list.reduce((sum, unit) => sum + unit.baseRent + unit.additionalCosts, 0)} €
+                                  </TableCell>
+                                </TableRow>
+                              </TableBody>
+                            </Table>
                           </div>
                         </div>
                       </div>
@@ -701,17 +812,31 @@ export default function PropertyDetail() {
                         <DialogTrigger asChild>
                           <Button size="sm">
                             <Plus className="mr-2 h-4 w-4" />
-                            Rechnung hinzufügen
+                            Buchung hinzufügen
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>Neue Rechnung hinzufügen</DialogTitle>
+                            <DialogTitle>Neue Buchung hinzufügen</DialogTitle>
                             <DialogDescription>
-                              Fügen Sie eine neue Rechnung für diese Liegenschaft hinzu.
+                              Fügen Sie eine neue Buchung für diese Liegenschaft hinzu.
                             </DialogDescription>
                           </DialogHeader>
                           <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="transaction-type" className="text-right">
+                                Buchungstyp
+                              </Label>
+                              <Select defaultValue="expense">
+                                <SelectTrigger className="col-span-3">
+                                  <SelectValue placeholder="Buchungstyp auswählen" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="expense">Ausgabe</SelectItem>
+                                  <SelectItem value="income">Einnahme</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                             <div className="grid grid-cols-4 items-center gap-4">
                               <Label htmlFor="invoice-number" className="text-right">
                                 Rechnungsnummer
@@ -745,11 +870,11 @@ export default function PropertyDetail() {
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
                               <Label htmlFor="invoice-vendor" className="text-right">
-                                Lieferant
+                                Dienstleister
                               </Label>
                               <Input
                                 id="invoice-vendor"
-                                placeholder="Name des Lieferanten"
+                                placeholder="Name des Dienstleisters"
                                 className="col-span-3"
                               />
                             </div>
@@ -782,7 +907,7 @@ export default function PropertyDetail() {
                             </div>
                           </div>
                           <DialogFooter>
-                            <Button type="submit">Rechnung hinzufügen</Button>
+                            <Button type="submit">Buchung hinzufügen</Button>
                           </DialogFooter>
                         </DialogContent>
                       </Dialog>
@@ -795,17 +920,31 @@ export default function PropertyDetail() {
                           <DialogTrigger asChild>
                             <Button className="mt-4">
                               <Plus className="mr-2 h-4 w-4" />
-                              Rechnung hinzufügen
+                              Buchung hinzufügen
                             </Button>
                           </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
-                              <DialogTitle>Neue Rechnung hinzufügen</DialogTitle>
+                              <DialogTitle>Neue Buchung hinzufügen</DialogTitle>
                               <DialogDescription>
-                                Fügen Sie eine neue Rechnung für diese Liegenschaft hinzu.
+                                Fügen Sie eine neue Buchung für diese Liegenschaft hinzu.
                               </DialogDescription>
                             </DialogHeader>
                             <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="transaction-type" className="text-right">
+                                Buchungstyp
+                              </Label>
+                              <Select defaultValue="expense">
+                                <SelectTrigger className="col-span-3">
+                                  <SelectValue placeholder="Buchungstyp auswählen" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="expense">Ausgabe</SelectItem>
+                                  <SelectItem value="income">Einnahme</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                               <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="invoice-number" className="text-right">
                                   Rechnungsnummer
@@ -839,17 +978,17 @@ export default function PropertyDetail() {
                               </div>
                               <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="invoice-vendor" className="text-right">
-                                  Lieferant
+                                  Dienstleister
                                 </Label>
                                 <Input
                                   id="invoice-vendor"
-                                  placeholder="Name des Lieferanten"
+                                  placeholder="Name des Dienstleisters"
                                   className="col-span-3"
                                 />
                               </div>
                             </div>
                             <DialogFooter>
-                              <Button type="submit">Rechnung hinzufügen</Button>
+                              <Button type="submit">Buchung hinzufügen</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
