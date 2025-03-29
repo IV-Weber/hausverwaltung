@@ -370,7 +370,6 @@ export default function UnitDetail() {
                         </SelectContent>
                       </Select>
                     </div>
-                    <Separator className="my-2" />
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Kaltmiete</span>
                       <span className="font-medium">{unit.baseRent} €</span>
@@ -379,6 +378,7 @@ export default function UnitDetail() {
                       <span className="text-muted-foreground">Nebenkosten</span>
                       <span className="font-medium">{unit.additionalCosts} €</span>
                     </div>
+                    <Separator className="my-2" />
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Eigentümer</span>
                       <span className="font-medium">{ownerName || unit.owner || "Nicht angegeben"}</span>

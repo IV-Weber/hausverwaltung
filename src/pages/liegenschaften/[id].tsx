@@ -514,47 +514,67 @@ export default function PropertyDetail() {
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-2">
-                                <div className="flex justify-between">
-                                  <span className="text-sm text-muted-foreground">Status</span>
-                                  <span className={`text-sm font-medium ${
-                                    unit.status === "vacant" 
-                                      ? "text-red-500" 
-                                      : unit.status === "self-occupied" 
-                                        ? "text-blue-500" 
-                                        : "text-green-500"
-                                  }`}>
-                                    {unit.status === "vacant" 
-                                      ? "Leerstand" 
-                                      : unit.status === "self-occupied" 
-                                        ? "Selbstbewohnt" 
-                                        : "Vermietet"}
-                                  </span>
-                                </div>
-                                
-                                <div className="flex justify-between">
-                                  <span className="text-sm text-muted-foreground">
-                                    {type === "wegVerwaltung" ? "Hausgeld" : "Kaltmiete"}
-                                  </span>
-                                  <span className="text-sm font-medium">{unit.baseRent} €</span>
-                                </div>
-                                
-                                <div className="flex justify-between">
-                                  <span className="text-sm text-muted-foreground">Nebenkosten</span>
-                                  <span className="text-sm font-medium">{unit.additionalCosts} €</span>
-                                </div>
-                                
-                                {type === "wegVerwaltung" && (
-                                  <div className="flex justify-between">
-                                    <span className="text-sm text-muted-foreground">Eigentümer</span>
-                                    <span className="text-sm font-medium">{unit.owner}</span>
-                                  </div>
-                                )}
-                                
-                                {unit.tenant && (
-                                  <div className="flex justify-between">
-                                    <span className="text-sm text-muted-foreground">Mieter</span>
-                                    <span className="text-sm font-medium">{unit.tenant}</span>
-                                  </div>
+                                {type === "wegVerwaltung" ? (
+                                  <>
+                                    <div className="flex justify-between">
+                                      <span className="text-sm text-muted-foreground">Mieter</span>
+                                      <span className="text-sm font-medium">{unit.tenant || (unit.status === "self-occupied" ? unit.owner : "—")}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-sm text-muted-foreground">Kaltmiete</span>
+                                      <span className="text-sm font-medium">{unit.baseRent} €</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-sm text-muted-foreground">Nebenkosten</span>
+                                      <span className="text-sm font-medium">{unit.additionalCosts} €</span>
+                                    </div>
+                                    <Separator className="my-2" />
+                                    <div className="flex justify-between">
+                                      <span className="text-sm text-muted-foreground">Eigentümer</span>
+                                      <span className="text-sm font-medium">{unit.owner}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-sm text-muted-foreground">Hausgeld</span>
+                                      <span className="text-sm font-medium">{unit.additionalCosts} €</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-sm text-muted-foreground">Miteigentumsanteile</span>
+                                      <span className="text-sm font-medium">-</span>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="flex justify-between">
+                                      <span className="text-sm text-muted-foreground">Status</span>
+                                      <span className={`text-sm font-medium ${
+                                        unit.status === "vacant" 
+                                          ? "text-red-500" 
+                                          : unit.status === "self-occupied" 
+                                            ? "text-blue-500" 
+                                            : "text-green-500"
+                                      }`}>
+                                        {unit.status === "vacant" 
+                                          ? "Leerstand" 
+                                          : unit.status === "self-occupied" 
+                                            ? "Selbstbewohnt" 
+                                            : "Vermietet"}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-sm text-muted-foreground">Kaltmiete</span>
+                                      <span className="text-sm font-medium">{unit.baseRent} €</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-sm text-muted-foreground">Nebenkosten</span>
+                                      <span className="text-sm font-medium">{unit.additionalCosts} €</span>
+                                    </div>
+                                    {unit.tenant && (
+                                      <div className="flex justify-between">
+                                        <span className="text-sm text-muted-foreground">Mieter</span>
+                                        <span className="text-sm font-medium">{unit.tenant}</span>
+                                      </div>
+                                    )}
+                                  </>
                                 )}
                               </div>
                             </CardContent>
@@ -784,32 +804,67 @@ export default function PropertyDetail() {
                             <Table>
                               <TableHeader>
                                 <TableRow>
-                                  <TableHead>Einheit</TableHead>
-                                  <TableHead>Kaltmiete</TableHead>
-                                  <TableHead>Nebenkosten</TableHead>
-                                  <TableHead>Gesamt</TableHead>
+                                  {type === "wegVerwaltung" ? (
+                                    <>
+                                      <TableHead>Einheit</TableHead>
+                                      <TableHead>Miteigentumsanteile</TableHead>
+                                      <TableHead>Hausgeld</TableHead>
+                                      <TableHead>Eigentümer</TableHead>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <TableHead>Einheit</TableHead>
+                                      <TableHead>Kaltmiete</TableHead>
+                                      <TableHead>Nebenkosten</TableHead>
+                                      <TableHead>Gesamt</TableHead>
+                                    </>
+                                  )}
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
                                 {property.units_list.map((unit) => (
                                   <TableRow key={unit.id}>
-                                    <TableCell className="font-medium">{unit.name}</TableCell>
-                                    <TableCell>{unit.baseRent} €</TableCell>
-                                    <TableCell>{unit.additionalCosts} €</TableCell>
-                                    <TableCell className="font-medium">{unit.baseRent + unit.additionalCosts} €</TableCell>
+                                    {type === "wegVerwaltung" ? (
+                                      <>
+                                        <TableCell className="font-medium">{unit.name}</TableCell>
+                                        <TableCell>-</TableCell>
+                                        <TableCell>{unit.additionalCosts} €</TableCell>
+                                        <TableCell>{unit.owner}</TableCell>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <TableCell className="font-medium">{unit.name}</TableCell>
+                                        <TableCell>{unit.baseRent} €</TableCell>
+                                        <TableCell>{unit.additionalCosts} €</TableCell>
+                                        <TableCell className="font-medium">{unit.baseRent + unit.additionalCosts} €</TableCell>
+                                      </>
+                                    )}
                                   </TableRow>
                                 ))}
                                 <TableRow>
-                                  <TableCell className="font-bold">Gesamt</TableCell>
-                                  <TableCell className="font-bold">
-                                    {property.units_list.reduce((sum, unit) => sum + unit.baseRent, 0)} €
-                                  </TableCell>
-                                  <TableCell className="font-bold">
-                                    {property.units_list.reduce((sum, unit) => sum + unit.additionalCosts, 0)} €
-                                  </TableCell>
-                                  <TableCell className="font-bold">
-                                    {property.units_list.reduce((sum, unit) => sum + unit.baseRent + unit.additionalCosts, 0)} €
-                                  </TableCell>
+                                  {type === "wegVerwaltung" ? (
+                                    <>
+                                      <TableCell className="font-bold">Gesamt</TableCell>
+                                      <TableCell className="font-bold">1000/1000</TableCell>
+                                      <TableCell className="font-bold">
+                                        {property.units_list.reduce((sum, unit) => sum + unit.additionalCosts, 0)} €
+                                      </TableCell>
+                                      <TableCell></TableCell>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <TableCell className="font-bold">Gesamt</TableCell>
+                                      <TableCell className="font-bold">
+                                        {property.units_list.reduce((sum, unit) => sum + unit.baseRent, 0)} €
+                                      </TableCell>
+                                      <TableCell className="font-bold">
+                                        {property.units_list.reduce((sum, unit) => sum + unit.additionalCosts, 0)} €
+                                      </TableCell>
+                                      <TableCell className="font-bold">
+                                        {property.units_list.reduce((sum, unit) => sum + unit.baseRent + unit.additionalCosts, 0)} €
+                                      </TableCell>
+                                    </>
+                                  )}
                                 </TableRow>
                               </TableBody>
                             </Table>
@@ -1025,8 +1080,12 @@ export default function PropertyDetail() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle>Mieteingänge</CardTitle>
-                      <CardDescription>Übersicht der Mieteingänge nach Einheiten</CardDescription>
+                      <CardTitle>{type === "wegVerwaltung" ? "Hausgeldeingänge" : "Mieteingänge"}</CardTitle>
+                      <CardDescription>
+                        {type === "wegVerwaltung" 
+                          ? "Übersicht der Hausgeldeingänge nach Einheiten" 
+                          : "Übersicht der Mieteingänge nach Einheiten"}
+                      </CardDescription>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -1035,7 +1094,11 @@ export default function PropertyDetail() {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Einheit</TableHead>
-                            <TableHead>Mieter</TableHead>
+                            {type === "wegVerwaltung" ? (
+                              <TableHead>Eigentümer</TableHead>
+                            ) : (
+                              <TableHead>Mieter</TableHead>
+                            )}
                             <TableHead>Betrag</TableHead>
                             <TableHead>Fälligkeit</TableHead>
                             <TableHead>Status</TableHead>
@@ -1043,26 +1106,49 @@ export default function PropertyDetail() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {property.units_list
-                            .filter(unit => unit.status === "rented")
-                            .map((unit) => (
-                            <TableRow key={unit.id}>
-                              <TableCell className="font-medium">{unit.name}</TableCell>
-                              <TableCell>{unit.tenant}</TableCell>
-                              <TableCell>{unit.baseRent + unit.additionalCosts} €</TableCell>
-                              <TableCell>01.04.2025</TableCell>
-                              <TableCell>
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                  Ausstehend
-                                </span>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <Button variant="outline" size="sm">
-                                  Als bezahlt markieren
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                          {type === "wegVerwaltung" ? (
+                            // For WEG-Verwaltung, show all units with their owners
+                            property.units_list.map((unit) => (
+                              <TableRow key={unit.id}>
+                                <TableCell className="font-medium">{unit.name}</TableCell>
+                                <TableCell>{unit.owner}</TableCell>
+                                <TableCell>{unit.additionalCosts} €</TableCell>
+                                <TableCell>01.04.2025</TableCell>
+                                <TableCell>
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                    Ausstehend
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button variant="outline" size="sm">
+                                    Als bezahlt markieren
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            // For Hausverwaltung, show only rented units with their tenants
+                            property.units_list
+                              .filter(unit => unit.status === "rented")
+                              .map((unit) => (
+                                <TableRow key={unit.id}>
+                                  <TableCell className="font-medium">{unit.name}</TableCell>
+                                  <TableCell>{unit.tenant}</TableCell>
+                                  <TableCell>{unit.baseRent + unit.additionalCosts} €</TableCell>
+                                  <TableCell>01.04.2025</TableCell>
+                                  <TableCell>
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                      Ausstehend
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <Button variant="outline" size="sm">
+                                      Als bezahlt markieren
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                          )}
                         </TableBody>
                       </Table>
                     </div>
@@ -1192,6 +1278,9 @@ export default function PropertyDetail() {
                                   <SelectItem value="owner">Eigentümerabrechnung</SelectItem>
                                   <SelectItem value="utilities">Nebenkostenabrechnung</SelectItem>
                                   <SelectItem value="profit-loss">Gewinn- und Verlustrechnung (GUV)</SelectItem>
+                                  {type === "wegVerwaltung" && (
+                                    <SelectItem value="wirtschaftsplan">Wirtschaftsplan</SelectItem>
+                                  )}
                                   <SelectItem value="other">Sonstige Abrechnung</SelectItem>
                                 </SelectContent>
                               </Select>
