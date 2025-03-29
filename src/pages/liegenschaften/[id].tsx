@@ -193,10 +193,16 @@ export default function PropertyDetail() {
   const router = useRouter();
   const { id, type } = router.query;
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>();
+  const [selectedTransactionType, setSelectedTransactionType] = useState<string>("expense");
   
   // Function to handle status change
   const handleStatusChange = (value: string) => {
     setSelectedStatus(value);
+  };
+  
+  // Function to handle transaction type change
+  const handleTransactionTypeChange = (value: string) => {
+    setSelectedTransactionType(value);
   };
   
   // Determine which property list to use based on the type
@@ -321,6 +327,7 @@ export default function PropertyDetail() {
                 <TabsTrigger value="documents">Dokumente</TabsTrigger>
                 <TabsTrigger value="maintenance">Instandhaltung</TabsTrigger>
                 <TabsTrigger value="finances">Finanzen</TabsTrigger>
+                <TabsTrigger value="statements">Abrechnungen</TabsTrigger>
                 {type === "wegVerwaltung" && (
                   <TabsTrigger value="meetings">Versammlungen</TabsTrigger>
                 )}
@@ -887,11 +894,19 @@ export default function PropertyDetail() {
                                   <SelectValue placeholder="Kategorie auswählen" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="maintenance">Instandhaltung</SelectItem>
-                                  <SelectItem value="utilities">Nebenkosten</SelectItem>
-                                  <SelectItem value="insurance">Versicherung</SelectItem>
-                                  <SelectItem value="tax">Steuern</SelectItem>
-                                  <SelectItem value="other">Sonstiges</SelectItem>
+                                  {/* Conditional categories based on transaction type */}
+                                  {selectedTransactionType === "expense" ? (
+                                    <>
+                                      <SelectItem value="allocatable">umlegbar</SelectItem>
+                                      <SelectItem value="non-allocatable">nicht umlegbar</SelectItem>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <SelectItem value="credit">Gutschrift</SelectItem>
+                                      <SelectItem value="refund">Rückbuchung</SelectItem>
+                                      <SelectItem value="other">Sonstiges</SelectItem>
+                                    </>
+                                  )}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -1040,6 +1055,176 @@ export default function PropertyDetail() {
                           ))}
                         </TableBody>
                       </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="statements">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Abrechnungen</CardTitle>
+                      <CardDescription>Erstellung und Verwaltung von Abrechnungen für die Liegenschaft</CardDescription>
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="gap-1">
+                          <Plus className="h-4 w-4" /> Abrechnung erstellen
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Neue Abrechnung erstellen</DialogTitle>
+                          <DialogDescription>
+                            Erstellen Sie eine neue Abrechnung für diese Liegenschaft.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="statement-type" className="text-right">
+                              Abrechnungstyp
+                            </Label>
+                            <Select>
+                              <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Typ auswählen" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="owner">Eigentümerabrechnung</SelectItem>
+                                <SelectItem value="utilities">Nebenkostenabrechnung</SelectItem>
+                                <SelectItem value="profit-loss">Gewinn- und Verlustrechnung (GUV)</SelectItem>
+                                <SelectItem value="other">Sonstige Abrechnung</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="statement-year" className="text-right">
+                              Abrechnungsjahr
+                            </Label>
+                            <Select>
+                              <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Jahr auswählen" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="2025">2025</SelectItem>
+                                <SelectItem value="2024">2024</SelectItem>
+                                <SelectItem value="2023">2023</SelectItem>
+                                <SelectItem value="2022">2022</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="statement-period" className="text-right">
+                              Abrechnungszeitraum
+                            </Label>
+                            <Select>
+                              <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Zeitraum auswählen" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="full-year">Gesamtes Jahr</SelectItem>
+                                <SelectItem value="q1">1. Quartal</SelectItem>
+                                <SelectItem value="q2">2. Quartal</SelectItem>
+                                <SelectItem value="q3">3. Quartal</SelectItem>
+                                <SelectItem value="q4">4. Quartal</SelectItem>
+                                <SelectItem value="h1">1. Halbjahr</SelectItem>
+                                <SelectItem value="h2">2. Halbjahr</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="statement-title" className="text-right">
+                              Titel
+                            </Label>
+                            <Input
+                              id="statement-title"
+                              placeholder="z.B. Nebenkostenabrechnung 2025"
+                              className="col-span-3"
+                            />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="statement-notes" className="text-right">
+                              Notizen
+                            </Label>
+                            <Textarea
+                              id="statement-notes"
+                              placeholder="Zusätzliche Informationen zur Abrechnung"
+                              className="col-span-3"
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button type="submit">Abrechnung erstellen</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-8">
+                      <Calendar className="h-12 w-12 mx-auto text-muted-foreground" />
+                      <p className="mt-4 text-muted-foreground">Keine Abrechnungen vorhanden</p>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button className="mt-4 gap-1">
+                            <Plus className="h-4 w-4" /> Abrechnung erstellen
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Neue Abrechnung erstellen</DialogTitle>
+                            <DialogDescription>
+                              Erstellen Sie eine neue Abrechnung für diese Liegenschaft.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="statement-type" className="text-right">
+                                Abrechnungstyp
+                              </Label>
+                              <Select>
+                                <SelectTrigger className="col-span-3">
+                                  <SelectValue placeholder="Typ auswählen" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="owner">Eigentümerabrechnung</SelectItem>
+                                  <SelectItem value="utilities">Nebenkostenabrechnung</SelectItem>
+                                  <SelectItem value="profit-loss">Gewinn- und Verlustrechnung (GUV)</SelectItem>
+                                  <SelectItem value="other">Sonstige Abrechnung</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="statement-year" className="text-right">
+                                Abrechnungsjahr
+                              </Label>
+                              <Select>
+                                <SelectTrigger className="col-span-3">
+                                  <SelectValue placeholder="Jahr auswählen" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="2025">2025</SelectItem>
+                                  <SelectItem value="2024">2024</SelectItem>
+                                  <SelectItem value="2023">2023</SelectItem>
+                                  <SelectItem value="2022">2022</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="statement-title" className="text-right">
+                                Titel
+                              </Label>
+                              <Input
+                                id="statement-title"
+                                placeholder="z.B. Nebenkostenabrechnung 2025"
+                                className="col-span-3"
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button type="submit">Abrechnung erstellen</Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </CardContent>
                 </Card>
