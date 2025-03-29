@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import Header from "@/components/Header";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Building, Home, Users, BarChart3, DoorClosed, UserCheck } from "lucide-react";
+import { Building, Home, Users, BarChart3, DoorClosed, UserCheck, MapPin, ArrowRight } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 
 export default function Liegenschaften() {
+  const router = useRouter();
   const [selectedType, setSelectedType] = useState<string | null>(null);
   
   // Mock data for statistics
@@ -31,6 +34,46 @@ export default function Liegenschaften() {
       vacant: 5,
       selfOccupied: 14
     }
+  };
+  
+  // Mock data for properties
+  const properties = {
+    hausverwaltung: [
+      {
+        id: "1",
+        name: "Wohnanlage Sonnenblick",
+        address: "Sonnenallee 42, 10435 Berlin",
+        buildYear: 1998,
+        units: 12,
+        image: "/images/rect.png"
+      },
+      {
+        id: "2",
+        name: "Stadthaus Grüner Weg",
+        address: "Grüner Weg 15, 10115 Berlin",
+        buildYear: 2005,
+        units: 8,
+        image: "/images/rect.png"
+      }
+    ],
+    wegVerwaltung: [
+      {
+        id: "3",
+        name: "Eigentümergemeinschaft Parkblick",
+        address: "Parkstraße 78, 10178 Berlin",
+        buildYear: 2010,
+        units: 24,
+        image: "/images/rect.png"
+      },
+      {
+        id: "4",
+        name: "WEG Seeblick",
+        address: "Seestraße 120, 13353 Berlin",
+        buildYear: 2015,
+        units: 18,
+        image: "/images/rect.png"
+      }
+    ]
   };
 
   return (
@@ -96,12 +139,8 @@ export default function Liegenschaften() {
                   <TabsList className="mb-4">
                     <TabsTrigger value="overview">Übersicht</TabsTrigger>
                     <TabsTrigger value="objects">Objekte</TabsTrigger>
-                    <TabsTrigger value="units">Einheiten</TabsTrigger>
                     {selectedType === "weg-verwaltung" && (
                       <TabsTrigger value="owners">Eigentümer</TabsTrigger>
-                    )}
-                    {selectedType === "hausverwaltung" && (
-                      <TabsTrigger value="tenants">Mieter</TabsTrigger>
                     )}
                   </TabsList>
                   
@@ -116,7 +155,7 @@ export default function Liegenschaften() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                           <Card>
                             <CardHeader className="pb-2">
                               <CardTitle className="text-lg">Objekte</CardTitle>
@@ -158,6 +197,119 @@ export default function Liegenschaften() {
                             </CardContent>
                           </Card>
                         </div>
+                        
+                        {/* Statistics Section - Now inside the Overview tab */}
+                        <div className="mt-6">
+                          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5 text-primary" />
+                            Statistik
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                              <h3 className="text-lg font-medium mb-4">Immobilien</h3>
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Building className="h-4 w-4 text-primary" />
+                                    <span>Häuser</span>
+                                  </div>
+                                  <span className="font-medium">
+                                    {selectedType === "hausverwaltung" 
+                                      ? statistics.hausverwaltung.buildings 
+                                      : statistics.wegVerwaltung.buildings}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Home className="h-4 w-4 text-primary" />
+                                    <span>Einheiten</span>
+                                  </div>
+                                  <span className="font-medium">
+                                    {selectedType === "hausverwaltung" 
+                                      ? statistics.hausverwaltung.units 
+                                      : statistics.wegVerwaltung.units}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <DoorClosed className="h-4 w-4 text-primary" />
+                                    <span>Ø Einheiten pro Haus</span>
+                                  </div>
+                                  <span className="font-medium">
+                                    {selectedType === "hausverwaltung" 
+                                      ? statistics.hausverwaltung.avgUnitsPerBuilding 
+                                      : statistics.wegVerwaltung.avgUnitsPerBuilding}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <h3 className="text-lg font-medium mb-4">Personen</h3>
+                              <div className="space-y-4">
+                                {selectedType === "weg-verwaltung" && (
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <UserCheck className="h-4 w-4 text-primary" />
+                                      <span>Eigentümer</span>
+                                    </div>
+                                    <span className="font-medium">{statistics.wegVerwaltung.owners}</span>
+                                  </div>
+                                )}
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Users className="h-4 w-4 text-primary" />
+                                    <span>Mieter</span>
+                                  </div>
+                                  <span className="font-medium">
+                                    {selectedType === "hausverwaltung" 
+                                      ? statistics.hausverwaltung.tenants 
+                                      : statistics.wegVerwaltung.tenants}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div>
+                              <h3 className="text-lg font-medium mb-4">Nutzung</h3>
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                                    <span>Vermietet</span>
+                                  </div>
+                                  <span className="font-medium">
+                                    {selectedType === "hausverwaltung" 
+                                      ? statistics.hausverwaltung.rented 
+                                      : statistics.wegVerwaltung.rented}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                                    <span>Leerstand</span>
+                                  </div>
+                                  <span className="font-medium">
+                                    {selectedType === "hausverwaltung" 
+                                      ? statistics.hausverwaltung.vacant 
+                                      : statistics.wegVerwaltung.vacant}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                                    <span>Selbstbewohnt</span>
+                                  </div>
+                                  <span className="font-medium">
+                                    {selectedType === "hausverwaltung" 
+                                      ? statistics.hausverwaltung.selfOccupied 
+                                      : statistics.wegVerwaltung.selfOccupied}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </CardContent>
                     </Card>
                   </TabsContent>
@@ -173,27 +325,56 @@ export default function Liegenschaften() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-center py-8">
-                          <Building className="h-12 w-12 mx-auto text-muted-foreground" />
-                          <p className="mt-4 text-muted-foreground">Keine Objekte vorhanden</p>
-                          <Button className="mt-4">Objekt hinzufügen</Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                  
-                  <TabsContent value="units">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Einheiten</CardTitle>
-                        <CardDescription>Wohn- und Gewerbeeinheiten</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-center py-8">
-                          <Home className="h-12 w-12 mx-auto text-muted-foreground" />
-                          <p className="mt-4 text-muted-foreground">Keine Einheiten vorhanden</p>
-                          <Button className="mt-4">Einheit hinzufügen</Button>
-                        </div>
+                        {selectedType && properties[selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung"].length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {properties[selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung"].map((property) => (
+                              <Card 
+                                key={property.id} 
+                                className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                                onClick={() => router.push({
+                                  pathname: `/liegenschaften/${property.id}`,
+                                  query: { type: selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung" }
+                                })}
+                              >
+                                <div className="aspect-video bg-muted">
+                                  <img 
+                                    src={property.image} 
+                                    alt={property.name} 
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <CardHeader className="pb-2">
+                                  <CardTitle className="text-lg">{property.name}</CardTitle>
+                                  <CardDescription className="flex items-center">
+                                    <MapPin className="h-3 w-3 mr-1" />
+                                    {property.address}
+                                  </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="flex justify-between text-sm">
+                                    <div>
+                                      <span className="text-muted-foreground">Baujahr:</span> {property.buildYear}
+                                    </div>
+                                    <div>
+                                      <span className="text-muted-foreground">Einheiten:</span> {property.units}
+                                    </div>
+                                  </div>
+                                </CardContent>
+                                <CardFooter className="pt-0 flex justify-end">
+                                  <Button variant="ghost" size="sm" className="gap-1">
+                                    Details <ArrowRight className="h-3 w-3" />
+                                  </Button>
+                                </CardFooter>
+                              </Card>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <Building className="h-12 w-12 mx-auto text-muted-foreground" />
+                            <p className="mt-4 text-muted-foreground">Keine Objekte vorhanden</p>
+                            <Button className="mt-4">Objekt hinzufügen</Button>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   </TabsContent>
@@ -215,147 +396,7 @@ export default function Liegenschaften() {
                       </Card>
                     </TabsContent>
                   )}
-                  
-                  {selectedType === "hausverwaltung" && (
-                    <TabsContent value="tenants">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Mieter</CardTitle>
-                          <CardDescription>Mieter der Wohneinheiten</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-center py-8">
-                            <Users className="h-12 w-12 mx-auto text-muted-foreground" />
-                            <p className="mt-4 text-muted-foreground">Keine Mieter vorhanden</p>
-                            <Button className="mt-4">Mieter hinzufügen</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                  )}
                 </Tabs>
-
-                {/* Statistics Section */}
-                <Card className="mt-6">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5 text-primary" />
-                      Statistik
-                    </CardTitle>
-                    <CardDescription>
-                      {selectedType === "hausverwaltung" 
-                        ? "Kennzahlen Ihrer Hausverwaltung" 
-                        : "Kennzahlen Ihrer WEG-Verwaltung"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">Immobilien</h3>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Building className="h-4 w-4 text-primary" />
-                              <span>Häuser</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.buildings 
-                                : statistics.wegVerwaltung.buildings}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Home className="h-4 w-4 text-primary" />
-                              <span>Einheiten</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.units 
-                                : statistics.wegVerwaltung.units}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <DoorClosed className="h-4 w-4 text-primary" />
-                              <span>Ø Einheiten pro Haus</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.avgUnitsPerBuilding 
-                                : statistics.wegVerwaltung.avgUnitsPerBuilding}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">Personen</h3>
-                        <div className="space-y-4">
-                          {selectedType === "weg-verwaltung" && (
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <UserCheck className="h-4 w-4 text-primary" />
-                                <span>Eigentümer</span>
-                              </div>
-                              <span className="font-medium">{statistics.wegVerwaltung.owners}</span>
-                            </div>
-                          )}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Users className="h-4 w-4 text-primary" />
-                              <span>Mieter</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.tenants 
-                                : statistics.wegVerwaltung.tenants}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">Nutzung</h3>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="w-3 h-3 rounded-full bg-green-500"></span>
-                              <span>Vermietet</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.rented 
-                                : statistics.wegVerwaltung.rented}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="w-3 h-3 rounded-full bg-red-500"></span>
-                              <span>Leerstand</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.vacant 
-                                : statistics.wegVerwaltung.vacant}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="w-3 h-3 rounded-full bg-blue-500"></span>
-                              <span>Selbstbewohnt</span>
-                            </div>
-                            <span className="font-medium">
-                              {selectedType === "hausverwaltung" 
-                                ? statistics.hausverwaltung.selfOccupied 
-                                : statistics.wegVerwaltung.selfOccupied}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
             )}
           </div>
