@@ -141,9 +141,6 @@ export default function Liegenschaften() {
                   <TabsList className="mb-4">
                     <TabsTrigger value="overview">Übersicht</TabsTrigger>
                     <TabsTrigger value="objects">Objekte</TabsTrigger>
-                    {selectedType === "weg-verwaltung" && (
-                      <TabsTrigger value="owners">Eigentümer</TabsTrigger>
-                    )}
                   </TabsList>
                   
                   <TabsContent value="overview">
@@ -383,23 +380,7 @@ export default function Liegenschaften() {
                     </Card>
                   </TabsContent>
                   
-                  {selectedType === "weg-verwaltung" && (
-                    <TabsContent value="owners">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Eigentümer</CardTitle>
-                          <CardDescription>Eigentümer der Wohneinheiten</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-center py-8">
-                            <Users className="h-12 w-12 mx-auto text-muted-foreground" />
-                            <p className="mt-4 text-muted-foreground">Keine Eigentümer vorhanden</p>
-                            <Button className="mt-4">Eigentümer hinzufügen</Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                  )}
+
                 </Tabs>
               </div>
             )}
