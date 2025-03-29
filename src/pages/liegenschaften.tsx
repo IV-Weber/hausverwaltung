@@ -343,10 +343,13 @@ export default function Liegenschaften() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {properties[selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung"].map((property, index) => (
+                                {properties[selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung"]
+                                  .slice() // Create a copy to avoid mutating the original array
+                                  .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
+                                  .map((property, index, sortedArray) => (
                                   <tr 
                                     key={property.id}
-                                    className={`cursor-pointer hover:bg-muted/50 ${index !== properties[selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung"].length - 1 ? 'border-b' : ''}`}
+                                    className={`cursor-pointer hover:bg-muted/50 ${index !== sortedArray.length - 1 ? 'border-b' : ''}`}
                                     onClick={() => router.push({
                                       pathname: `/liegenschaften/${property.id}`,
                                       query: { type: selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung" }

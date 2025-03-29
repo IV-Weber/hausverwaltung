@@ -464,7 +464,10 @@ export default function PropertyDetail() {
                   <CardContent>
                     {property.units_list.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {property.units_list.map((unit) => (
+                        {property.units_list
+                          .slice() // Create a copy to avoid mutating the original array
+                          .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
+                          .map((unit) => (
                           <Card 
                             key={unit.id} 
                             className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
