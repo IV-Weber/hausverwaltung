@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
@@ -203,10 +203,25 @@ export default function UnitDetail() {
   // Find the unit with the matching ID
   const unit = property?.units_list?.find(u => u.id === unitId);
   
-  // State for tenant form
+  // State for unit status and data
+  const [unitStatus, setUnitStatus] = useState(unit?.status || "vacant");
   const [tenantName, setTenantName] = useState(unit?.tenant || "");
   const [tenantEmail, setTenantEmail] = useState("");
   const [tenantPhone, setTenantPhone] = useState("");
+  
+  // State for owner data
+  const [ownerName, setOwnerName] = useState(unit?.owner || "");
+  const [ownerEmail, setOwnerEmail] = useState("");
+  const [ownerPhone, setOwnerPhone] = useState("");
+  const [ownerAddress, setOwnerAddress] = useState("");
+  
+  // Update tenant visibility based on status
+  const [showTenantInfo, setShowTenantInfo] = useState(unit?.status === "rented");
+  
+  // Effect to update tenant visibility when status changes
+  useEffect(() => {
+    setShowTenantInfo(unitStatus === "rented");
+  }, [unitStatus]);
   
   // State for meters management
   const [meters, setMeters] = useState<Meter[]>([
@@ -335,21 +350,21 @@ export default function UnitDetail() {
                       <span className="text-muted-foreground">Zimmer</span>
                       <span className="font-medium">{unit.rooms}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Status</span>
-                      <span className={`font-medium ${
-                        unit.status === "vacant" 
-                          ? "text-red-500" 
-                          : unit.status === "self-occupied" 
-                            ? "text-blue-500" 
-                            : "text-green-500"
-                      }`}>
-                        {unit.status === "vacant" 
-                          ? "Leerstand" 
-                          : unit.status === "self-occupied" 
-                            ? "Selbstbewohnt" 
-                            : "Vermietet"}
-                      </span>
+                      <Select 
+                        value={unitStatus} 
+                        onValueChange={(value) => setUnitStatus(value)}
+                      >
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="vacant">Leerstand</SelectItem>
+                          <SelectItem value="rented">Vermietet</SelectItem>
+                          <SelectItem value="self-occupied">Selbstbewohnt</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between">
@@ -368,16 +383,78 @@ export default function UnitDetail() {
                 </CardContent>
               </Card>
               
-              {type === "wegVerwaltung" && (
+              {/* Owner Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Eigentümer</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Name</span>
+                      <span className="font-medium">{ownerName || unit.owner || "Nicht angegeben"}</span>
+                    </div>
+                    {ownerEmail && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">E-Mail</span>
+                        <span className="font-medium">{ownerEmail}</span>
+                      </div>
+                    )}
+                    {ownerPhone && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Telefon</span>
+                        <span className="font-medium">{ownerPhone}</span>
+                      </div>
+                    )}
+                    {ownerAddress && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Adresse</span>
+                        <span className="font-medium">{ownerAddress}</span>
+                      </div>
+                    )}
+                    <div className="mt-2 text-right">
+                      <Button variant="outline" size="sm" onClick={() => {
+                        const tab = document.querySelector('[data-value="owner"]') as HTMLElement;
+                        if (tab) tab.click();
+                      }}>
+                        Details bearbeiten
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Tenant Card - Only shown when status is "rented" */}
+              {showTenantInfo && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Eigentümer</CardTitle>
+                    <CardTitle className="text-lg">Mieter</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Name</span>
-                        <span className="font-medium">{unit.owner}</span>
+                        <span className="font-medium">{tenantName || "Nicht angegeben"}</span>
+                      </div>
+                      {tenantEmail && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">E-Mail</span>
+                          <span className="font-medium">{tenantEmail}</span>
+                        </div>
+                      )}
+                      {tenantPhone && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Telefon</span>
+                          <span className="font-medium">{tenantPhone}</span>
+                        </div>
+                      )}
+                      <div className="mt-2 text-right">
+                        <Button variant="outline" size="sm" onClick={() => {
+                          const tab = document.querySelector('[data-value="tenant"]') as HTMLElement;
+                          if (tab) tab.click();
+                        }}>
+                          Details bearbeiten
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -385,12 +462,18 @@ export default function UnitDetail() {
               )}
             </div>
             
-            <Tabs defaultValue={type === "wegVerwaltung" ? "owner" : "tenant"} className="w-full">
+            <Tabs 
+              defaultValue={
+                unitStatus === "self-occupied" ? "owner" : 
+                type === "wegVerwaltung" ? "owner" : "tenant"
+              } 
+              className="w-full"
+            >
               <TabsList className="mb-4">
-                <TabsTrigger value="tenant">Mieter</TabsTrigger>
-                {type === "wegVerwaltung" && (
-                  <TabsTrigger value="owner">Eigentümer</TabsTrigger>
+                {unitStatus !== "self-occupied" && (
+                  <TabsTrigger value="tenant">Mieter</TabsTrigger>
                 )}
+                <TabsTrigger value="owner">Eigentümer</TabsTrigger>
                 <TabsTrigger value="meters">Zählerstände</TabsTrigger>
                 <TabsTrigger value="documents">Dokumente</TabsTrigger>
                 <TabsTrigger value="notes">Notizen</TabsTrigger>
@@ -466,8 +549,7 @@ export default function UnitDetail() {
                 </Card>
               </TabsContent>
               
-              {type === "wegVerwaltung" && (
-                <TabsContent value="owner">
+              <TabsContent value="owner">
                   <Card>
                     <CardHeader>
                       <CardTitle>Eigentümerdaten</CardTitle>
@@ -482,7 +564,8 @@ export default function UnitDetail() {
                             <Label htmlFor="owner-name">Name</Label>
                             <Input 
                               id="owner-name" 
-                              defaultValue={unit.owner || ""} 
+                              value={ownerName}
+                              onChange={(e) => setOwnerName(e.target.value)}
                               placeholder="Name des Eigentümers"
                             />
                           </div>
@@ -491,6 +574,8 @@ export default function UnitDetail() {
                             <Label htmlFor="owner-address">Adresse</Label>
                             <Input 
                               id="owner-address" 
+                              value={ownerAddress}
+                              onChange={(e) => setOwnerAddress(e.target.value)}
                               placeholder="Adresse des Eigentümers"
                             />
                           </div>
@@ -500,6 +585,8 @@ export default function UnitDetail() {
                             <Input 
                               id="owner-email" 
                               type="email" 
+                              value={ownerEmail}
+                              onChange={(e) => setOwnerEmail(e.target.value)}
                               placeholder="E-Mail-Adresse"
                             />
                           </div>
@@ -508,27 +595,33 @@ export default function UnitDetail() {
                             <Label htmlFor="owner-phone">Telefon</Label>
                             <Input 
                               id="owner-phone" 
+                              value={ownerPhone}
+                              onChange={(e) => setOwnerPhone(e.target.value)}
                               placeholder="Telefonnummer"
                             />
                           </div>
                           
-                          <div className="space-y-2">
-                            <Label htmlFor="owner-fee">Monatliche Hausgeldzahlungen (€)</Label>
-                            <Input 
-                              id="owner-fee" 
-                              type="number"
-                              defaultValue={unit.additionalCosts || 0}
-                              placeholder="Monatliche Hausgeldzahlungen"
-                            />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="owner-share">Miteigentumsanteil</Label>
-                            <Input 
-                              id="owner-share" 
-                              placeholder="z.B. 125/1000"
-                            />
-                          </div>
+                          {type === "wegVerwaltung" && (
+                            <>
+                              <div className="space-y-2">
+                                <Label htmlFor="owner-fee">Monatliche Hausgeldzahlungen (€)</Label>
+                                <Input 
+                                  id="owner-fee" 
+                                  type="number"
+                                  defaultValue={unit.additionalCosts || 0}
+                                  placeholder="Monatliche Hausgeldzahlungen"
+                                />
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <Label htmlFor="owner-share">Miteigentumsanteil</Label>
+                                <Input 
+                                  id="owner-share" 
+                                  placeholder="z.B. 125/1000"
+                                />
+                              </div>
+                            </>
+                          )}
                           
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
@@ -556,7 +649,6 @@ export default function UnitDetail() {
                     </CardFooter>
                   </Card>
                 </TabsContent>
-              )}
               
               <TabsContent value="meters">
                 <Card>
