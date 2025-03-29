@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
 import Header from "@/components/Header";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Building, Home, MapPin, Calendar, Euro, ArrowLeft } from "lucide-react";
+import { Building, Home, MapPin, Calendar, Euro, ArrowLeft, Plus, Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Mock data for properties
 const properties = {
@@ -24,10 +28,46 @@ const properties = {
       owner: "Immobilien GmbH Berlin",
       image: "/images/rect.png",
       units_list: [
-        { id: "101", name: "Wohnung 1A", area: 65, rooms: 2, status: "rented", tenant: "Max Mustermann" },
-        { id: "102", name: "Wohnung 1B", area: 85, rooms: 3, status: "rented", tenant: "Anna Schmidt" },
-        { id: "103", name: "Wohnung 2A", area: 75, rooms: 2, status: "vacant", tenant: null },
-        { id: "104", name: "Wohnung 2B", area: 95, rooms: 4, status: "rented", tenant: "Familie Müller" },
+        { 
+          id: "101", 
+          name: "Wohnung 1A", 
+          area: 65, 
+          rooms: 2, 
+          status: "rented", 
+          tenant: "Max Mustermann",
+          baseRent: 750,
+          additionalCosts: 180
+        },
+        { 
+          id: "102", 
+          name: "Wohnung 1B", 
+          area: 85, 
+          rooms: 3, 
+          status: "rented", 
+          tenant: "Anna Schmidt",
+          baseRent: 950,
+          additionalCosts: 220
+        },
+        { 
+          id: "103", 
+          name: "Wohnung 2A", 
+          area: 75, 
+          rooms: 2, 
+          status: "vacant", 
+          tenant: null,
+          baseRent: 850,
+          additionalCosts: 200
+        },
+        { 
+          id: "104", 
+          name: "Wohnung 2B", 
+          area: 95, 
+          rooms: 4, 
+          status: "rented", 
+          tenant: "Familie Müller",
+          baseRent: 1100,
+          additionalCosts: 250
+        },
       ]
     },
     {
@@ -42,8 +82,26 @@ const properties = {
       owner: "Wohnbau AG",
       image: "/images/rect.png",
       units_list: [
-        { id: "201", name: "Wohnung 1", area: 80, rooms: 3, status: "rented", tenant: "Julia Weber" },
-        { id: "202", name: "Wohnung 2", area: 95, rooms: 4, status: "rented", tenant: "Thomas Becker" },
+        { 
+          id: "201", 
+          name: "Wohnung 1", 
+          area: 80, 
+          rooms: 3, 
+          status: "rented", 
+          tenant: "Julia Weber",
+          baseRent: 900,
+          additionalCosts: 210
+        },
+        { 
+          id: "202", 
+          name: "Wohnung 2", 
+          area: 95, 
+          rooms: 4, 
+          status: "rented", 
+          tenant: "Thomas Becker",
+          baseRent: 1050,
+          additionalCosts: 240
+        },
       ]
     }
   ],
@@ -59,9 +117,37 @@ const properties = {
       monthlyFee: 4800,
       image: "/images/rect.png",
       units_list: [
-        { id: "301", name: "Wohnung 1A", area: 75, rooms: 3, status: "self-occupied", owner: "Dr. Klaus Schmidt" },
-        { id: "302", name: "Wohnung 1B", area: 65, rooms: 2, status: "rented", owner: "Sabine Müller", tenant: "Peter Wagner" },
-        { id: "303", name: "Wohnung 2A", area: 90, rooms: 4, status: "self-occupied", owner: "Familie Hoffmann" },
+        { 
+          id: "301", 
+          name: "Wohnung 1A", 
+          area: 75, 
+          rooms: 3, 
+          status: "self-occupied", 
+          owner: "Dr. Klaus Schmidt",
+          baseRent: 0,
+          additionalCosts: 180
+        },
+        { 
+          id: "302", 
+          name: "Wohnung 1B", 
+          area: 65, 
+          rooms: 2, 
+          status: "rented", 
+          owner: "Sabine Müller", 
+          tenant: "Peter Wagner",
+          baseRent: 750,
+          additionalCosts: 170
+        },
+        { 
+          id: "303", 
+          name: "Wohnung 2A", 
+          area: 90, 
+          rooms: 4, 
+          status: "self-occupied", 
+          owner: "Familie Hoffmann",
+          baseRent: 0,
+          additionalCosts: 210
+        },
       ]
     },
     {
@@ -75,8 +161,27 @@ const properties = {
       monthlyFee: 3600,
       image: "/images/rect.png",
       units_list: [
-        { id: "401", name: "Wohnung 1", area: 85, rooms: 3, status: "rented", owner: "Markus Fischer", tenant: "Laura König" },
-        { id: "402", name: "Wohnung 2", area: 110, rooms: 4, status: "self-occupied", owner: "Familie Schneider" },
+        { 
+          id: "401", 
+          name: "Wohnung 1", 
+          area: 85, 
+          rooms: 3, 
+          status: "rented", 
+          owner: "Markus Fischer", 
+          tenant: "Laura König",
+          baseRent: 950,
+          additionalCosts: 220
+        },
+        { 
+          id: "402", 
+          name: "Wohnung 2", 
+          area: 110, 
+          rooms: 4, 
+          status: "self-occupied", 
+          owner: "Familie Schneider",
+          baseRent: 0,
+          additionalCosts: 260
+        },
       ]
     }
   ]
@@ -202,17 +307,101 @@ export default function PropertyDetail() {
               
               <TabsContent value="units">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Einheiten</CardTitle>
-                    <CardDescription>
-                      Übersicht aller Einheiten in dieser Liegenschaft
-                    </CardDescription>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Einheiten</CardTitle>
+                      <CardDescription>
+                        Übersicht aller Einheiten in dieser Liegenschaft
+                      </CardDescription>
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="gap-1">
+                          <Plus className="h-4 w-4" /> Einheit hinzufügen
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Neue Einheit hinzufügen</DialogTitle>
+                          <DialogDescription>
+                            Fügen Sie eine neue Einheit zu dieser Liegenschaft hinzu.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="name" className="text-right">
+                              Name
+                            </Label>
+                            <Input id="name" placeholder="z.B. Wohnung 3A" className="col-span-3" />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="area" className="text-right">
+                              Fläche (m²)
+                            </Label>
+                            <Input id="area" type="number" placeholder="75" className="col-span-3" />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="rooms" className="text-right">
+                              Zimmer
+                            </Label>
+                            <Input id="rooms" type="number" placeholder="3" className="col-span-3" />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="baseRent" className="text-right">
+                              Kaltmiete (€)
+                            </Label>
+                            <Input id="baseRent" type="number" placeholder="850" className="col-span-3" />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="additionalCosts" className="text-right">
+                              Nebenkosten (€)
+                            </Label>
+                            <Input id="additionalCosts" type="number" placeholder="200" className="col-span-3" />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="status" className="text-right">
+                              Status
+                            </Label>
+                            <Select>
+                              <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Status auswählen" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="vacant">Leerstand</SelectItem>
+                                <SelectItem value="rented">Vermietet</SelectItem>
+                                {type === "wegVerwaltung" && (
+                                  <SelectItem value="self-occupied">Selbstbewohnt</SelectItem>
+                                )}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          {type === "wegVerwaltung" && (
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="owner" className="text-right">
+                                Eigentümer
+                              </Label>
+                              <Input id="owner" placeholder="Name des Eigentümers" className="col-span-3" />
+                            </div>
+                          )}
+                        </div>
+                        <DialogFooter>
+                          <Button type="submit">Einheit hinzufügen</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </CardHeader>
                   <CardContent>
                     {property.units_list.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {property.units_list.map((unit) => (
-                          <Card key={unit.id} className="overflow-hidden">
+                          <Card 
+                            key={unit.id} 
+                            className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                            onClick={() => router.push({
+                              pathname: `/liegenschaften/${id}/units/${unit.id}`,
+                              query: { type }
+                            })}
+                          >
                             <CardHeader className="pb-2">
                               <CardTitle className="text-lg">{unit.name}</CardTitle>
                               <CardDescription>
@@ -238,6 +427,16 @@ export default function PropertyDetail() {
                                   </span>
                                 </div>
                                 
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Kaltmiete</span>
+                                  <span className="text-sm font-medium">{unit.baseRent} €</span>
+                                </div>
+                                
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Nebenkosten</span>
+                                  <span className="text-sm font-medium">{unit.additionalCosts} €</span>
+                                </div>
+                                
                                 {type === "wegVerwaltung" && (
                                   <div className="flex justify-between">
                                     <span className="text-sm text-muted-foreground">Eigentümer</span>
@@ -253,6 +452,9 @@ export default function PropertyDetail() {
                                 )}
                               </div>
                             </CardContent>
+                            <CardFooter className="pt-0 flex justify-end">
+                              <Button variant="ghost" size="sm">Details</Button>
+                            </CardFooter>
                           </Card>
                         ))}
                       </div>
@@ -260,7 +462,81 @@ export default function PropertyDetail() {
                       <div className="text-center py-8">
                         <Home className="h-12 w-12 mx-auto text-muted-foreground" />
                         <p className="mt-4 text-muted-foreground">Keine Einheiten vorhanden</p>
-                        <Button className="mt-4">Einheit hinzufügen</Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button className="mt-4 gap-1">
+                              <Plus className="h-4 w-4" /> Einheit hinzufügen
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Neue Einheit hinzufügen</DialogTitle>
+                              <DialogDescription>
+                                Fügen Sie eine neue Einheit zu dieser Liegenschaft hinzu.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="name" className="text-right">
+                                  Name
+                                </Label>
+                                <Input id="name" placeholder="z.B. Wohnung 3A" className="col-span-3" />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="area" className="text-right">
+                                  Fläche (m²)
+                                </Label>
+                                <Input id="area" type="number" placeholder="75" className="col-span-3" />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="rooms" className="text-right">
+                                  Zimmer
+                                </Label>
+                                <Input id="rooms" type="number" placeholder="3" className="col-span-3" />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="baseRent" className="text-right">
+                                  Kaltmiete (€)
+                                </Label>
+                                <Input id="baseRent" type="number" placeholder="850" className="col-span-3" />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="additionalCosts" className="text-right">
+                                  Nebenkosten (€)
+                                </Label>
+                                <Input id="additionalCosts" type="number" placeholder="200" className="col-span-3" />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="status" className="text-right">
+                                  Status
+                                </Label>
+                                <Select>
+                                  <SelectTrigger className="col-span-3">
+                                    <SelectValue placeholder="Status auswählen" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="vacant">Leerstand</SelectItem>
+                                    <SelectItem value="rented">Vermietet</SelectItem>
+                                    {type === "wegVerwaltung" && (
+                                      <SelectItem value="self-occupied">Selbstbewohnt</SelectItem>
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              {type === "wegVerwaltung" && (
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <Label htmlFor="owner" className="text-right">
+                                    Eigentümer
+                                  </Label>
+                                  <Input id="owner" placeholder="Name des Eigentümers" className="col-span-3" />
+                                </div>
+                              )}
+                            </div>
+                            <DialogFooter>
+                              <Button type="submit">Einheit hinzufügen</Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     )}
                   </CardContent>

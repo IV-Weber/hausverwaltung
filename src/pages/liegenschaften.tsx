@@ -328,54 +328,46 @@ export default function Liegenschaften() {
                       </CardHeader>
                       <CardContent>
                         {selectedType && properties[selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung"].length > 0 ? (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {properties[selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung"].map((property) => (
-                              <Card 
-                                key={property.id} 
-                                className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                                onClick={() => router.push({
-                                  pathname: `/liegenschaften/${property.id}`,
-                                  query: { type: selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung" }
-                                })}
-                              >
-                                <div className="aspect-video bg-muted">
-                                  <img 
-                                    src={property.image} 
-                                    alt={property.name} 
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <CardHeader className="pb-2">
-                                  <CardTitle className="text-lg">{property.name}</CardTitle>
-                                  <CardDescription className="flex items-center">
-                                    <MapPin className="h-3 w-3 mr-1" />
-                                    {property.address}
-                                  </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="flex flex-col gap-2 text-sm">
-                                    <div className="flex justify-between">
-                                      <div>
-                                        <span className="text-muted-foreground">Baujahr:</span> {property.buildYear}
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">Einheiten:</span> {property.units}
-                                      </div>
-                                    </div>
-                                    {selectedType === "hausverwaltung" && property.owner && (
-                                      <div>
-                                        <span className="text-muted-foreground">Eigentümer:</span> {property.owner}
-                                      </div>
+                          <div className="overflow-hidden rounded-md border">
+                            <table className="w-full">
+                              <thead>
+                                <tr className="bg-muted/50">
+                                  <th className="p-3 text-left font-medium">Name</th>
+                                  <th className="p-3 text-left font-medium">Adresse</th>
+                                  <th className="p-3 text-left font-medium">Baujahr</th>
+                                  <th className="p-3 text-left font-medium">Einheiten</th>
+                                  {selectedType === "hausverwaltung" && (
+                                    <th className="p-3 text-left font-medium">Eigentümer</th>
+                                  )}
+                                  <th className="p-3 text-right font-medium"></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {properties[selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung"].map((property, index) => (
+                                  <tr 
+                                    key={property.id}
+                                    className={`cursor-pointer hover:bg-muted/50 ${index !== properties[selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung"].length - 1 ? 'border-b' : ''}`}
+                                    onClick={() => router.push({
+                                      pathname: `/liegenschaften/${property.id}`,
+                                      query: { type: selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung" }
+                                    })}
+                                  >
+                                    <td className="p-3 font-medium">{property.name}</td>
+                                    <td className="p-3">{property.address}</td>
+                                    <td className="p-3">{property.buildYear}</td>
+                                    <td className="p-3">{property.units}</td>
+                                    {selectedType === "hausverwaltung" && (
+                                      <td className="p-3">{property.owner}</td>
                                     )}
-                                  </div>
-                                </CardContent>
-                                <CardFooter className="pt-0 flex justify-end">
-                                  <Button variant="ghost" size="sm" className="gap-1">
-                                    Details <ArrowRight className="h-3 w-3" />
-                                  </Button>
-                                </CardFooter>
-                              </Card>
-                            ))}
+                                    <td className="p-3 text-right">
+                                      <Button variant="ghost" size="sm" className="gap-1">
+                                        Details <ArrowRight className="h-3 w-3" />
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
                           </div>
                         ) : (
                           <div className="text-center py-8">
