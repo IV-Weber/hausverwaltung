@@ -45,7 +45,8 @@ export default function Liegenschaften() {
         address: "Sonnenallee 42, 10435 Berlin",
         buildYear: 1998,
         units: 12,
-        image: "/images/rect.png"
+        image: "/images/rect.png",
+        owner: "Immobilien GmbH Berlin"
       },
       {
         id: "2",
@@ -53,7 +54,8 @@ export default function Liegenschaften() {
         address: "Grüner Weg 15, 10115 Berlin",
         buildYear: 2005,
         units: 8,
-        image: "/images/rect.png"
+        image: "/images/rect.png",
+        owner: "Wohnbau AG"
       }
     ],
     wegVerwaltung: [
@@ -351,13 +353,20 @@ export default function Liegenschaften() {
                                   </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                  <div className="flex justify-between text-sm">
-                                    <div>
-                                      <span className="text-muted-foreground">Baujahr:</span> {property.buildYear}
+                                  <div className="flex flex-col gap-2 text-sm">
+                                    <div className="flex justify-between">
+                                      <div>
+                                        <span className="text-muted-foreground">Baujahr:</span> {property.buildYear}
+                                      </div>
+                                      <div>
+                                        <span className="text-muted-foreground">Einheiten:</span> {property.units}
+                                      </div>
                                     </div>
-                                    <div>
-                                      <span className="text-muted-foreground">Einheiten:</span> {property.units}
-                                    </div>
+                                    {selectedType === "hausverwaltung" && property.owner && (
+                                      <div>
+                                        <span className="text-muted-foreground">Eigentümer:</span> {property.owner}
+                                      </div>
+                                    )}
                                   </div>
                                 </CardContent>
                                 <CardFooter className="pt-0 flex justify-end">

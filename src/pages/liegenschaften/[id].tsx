@@ -21,6 +21,7 @@ const properties = {
       units: 12,
       totalArea: 980,
       monthlyRent: 14500,
+      owner: "Immobilien GmbH Berlin",
       image: "/images/rect.png",
       units_list: [
         { id: "101", name: "Wohnung 1A", area: 65, rooms: 2, status: "rented", tenant: "Max Mustermann" },
@@ -38,6 +39,7 @@ const properties = {
       units: 8,
       totalArea: 720,
       monthlyRent: 11200,
+      owner: "Wohnbau AG",
       image: "/images/rect.png",
       units_list: [
         { id: "201", name: "Wohnung 1", area: 80, rooms: 3, status: "rented", tenant: "Julia Weber" },
@@ -178,6 +180,12 @@ export default function PropertyDetail() {
                         : `${property.monthlyFee} €`}
                     </p>
                   </div>
+                  {type === "hausverwaltung" && property.owner && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Eigentümer</p>
+                      <p className="font-medium">{property.owner}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
