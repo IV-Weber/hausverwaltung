@@ -390,6 +390,7 @@ export default function UnitDetail() {
                 <TabsTrigger value="tenant">Mieter</TabsTrigger>
                 <TabsTrigger value="meters">Zählerstände</TabsTrigger>
                 <TabsTrigger value="documents">Dokumente</TabsTrigger>
+                <TabsTrigger value="notes">Notizen</TabsTrigger>
               </TabsList>
               
               <TabsContent value="tenant">
@@ -843,6 +844,26 @@ export default function UnitDetail() {
                     <div className="text-center py-8">
                       <p className="text-muted-foreground mb-4">Keine Dokumente vorhanden</p>
                       <Button>Dokument hinzufügen</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="notes">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Notizen</CardTitle>
+                    <CardDescription>
+                      Notizen zu dieser Einheit
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <Textarea 
+                        placeholder="Notizen zu dieser Einheit eingeben..." 
+                        className="min-h-[200px]"
+                      />
+                      <Button>Speichern</Button>
                     </div>
                   </CardContent>
                 </Card>

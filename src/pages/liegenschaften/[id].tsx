@@ -12,6 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 
 // Mock data for properties
 const properties = {
@@ -306,6 +308,7 @@ export default function PropertyDetail() {
                 <TabsTrigger value="units">Einheiten</TabsTrigger>
                 <TabsTrigger value="documents">Dokumente</TabsTrigger>
                 <TabsTrigger value="maintenance">Instandhaltung</TabsTrigger>
+                <TabsTrigger value="finances">Finanzen</TabsTrigger>
                 {type === "wegVerwaltung" && (
                   <TabsTrigger value="meetings">Versammlungen</TabsTrigger>
                 )}
@@ -644,6 +647,260 @@ export default function PropertyDetail() {
                       <Building className="h-12 w-12 mx-auto text-muted-foreground" />
                       <p className="mt-4 text-muted-foreground">Keine Instandhaltungsmaßnahmen vorhanden</p>
                       <Button className="mt-4">Maßnahme hinzufügen</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="finances">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Finanzübersicht</CardTitle>
+                      <CardDescription>Finanzielle Übersicht der Liegenschaft</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-muted p-4 rounded-lg">
+                            <p className="text-sm text-muted-foreground mb-1">Monatliche Einnahmen</p>
+                            <p className="text-2xl font-bold text-green-500">
+                              {type === "hausverwaltung" 
+                                ? `${property.monthlyRent} €` 
+                                : `${property.monthlyFee} €`}
+                            </p>
+                          </div>
+                          <div className="bg-muted p-4 rounded-lg">
+                            <p className="text-sm text-muted-foreground mb-1">Offene Forderungen</p>
+                            <p className="text-2xl font-bold text-red-500">1.250 €</p>
+                          </div>
+                        </div>
+                        
+                        <div className="pt-4">
+                          <h3 className="text-lg font-medium mb-2">Einnahmen nach Einheiten</h3>
+                          <div className="space-y-2">
+                            {property.units_list.map((unit) => (
+                              <div key={unit.id} className="flex justify-between items-center p-2 border-b">
+                                <span>{unit.name}</span>
+                                <span className="font-medium">{unit.baseRent + unit.additionalCosts} €</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <div>
+                        <CardTitle>Rechnungen</CardTitle>
+                        <CardDescription>Verwaltung von Rechnungen</CardDescription>
+                      </div>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button size="sm">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Rechnung hinzufügen
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Neue Rechnung hinzufügen</DialogTitle>
+                            <DialogDescription>
+                              Fügen Sie eine neue Rechnung für diese Liegenschaft hinzu.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="invoice-number" className="text-right">
+                                Rechnungsnummer
+                              </Label>
+                              <Input
+                                id="invoice-number"
+                                placeholder="z.B. RE-12345"
+                                className="col-span-3"
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="invoice-date" className="text-right">
+                                Rechnungsdatum
+                              </Label>
+                              <Input
+                                id="invoice-date"
+                                type="date"
+                                className="col-span-3"
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="invoice-amount" className="text-right">
+                                Betrag (€)
+                              </Label>
+                              <Input
+                                id="invoice-amount"
+                                type="number"
+                                placeholder="0.00"
+                                className="col-span-3"
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="invoice-vendor" className="text-right">
+                                Lieferant
+                              </Label>
+                              <Input
+                                id="invoice-vendor"
+                                placeholder="Name des Lieferanten"
+                                className="col-span-3"
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="invoice-category" className="text-right">
+                                Kategorie
+                              </Label>
+                              <Select>
+                                <SelectTrigger className="col-span-3">
+                                  <SelectValue placeholder="Kategorie auswählen" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="maintenance">Instandhaltung</SelectItem>
+                                  <SelectItem value="utilities">Nebenkosten</SelectItem>
+                                  <SelectItem value="insurance">Versicherung</SelectItem>
+                                  <SelectItem value="tax">Steuern</SelectItem>
+                                  <SelectItem value="other">Sonstiges</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="invoice-notes" className="text-right">
+                                Notizen
+                              </Label>
+                              <Textarea
+                                id="invoice-notes"
+                                placeholder="Zusätzliche Informationen"
+                                className="col-span-3"
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button type="submit">Rechnung hinzufügen</Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-8">
+                        <Euro className="h-12 w-12 mx-auto text-muted-foreground" />
+                        <p className="mt-4 text-muted-foreground">Keine Rechnungen vorhanden</p>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button className="mt-4">
+                              <Plus className="mr-2 h-4 w-4" />
+                              Rechnung hinzufügen
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Neue Rechnung hinzufügen</DialogTitle>
+                              <DialogDescription>
+                                Fügen Sie eine neue Rechnung für diese Liegenschaft hinzu.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="invoice-number" className="text-right">
+                                  Rechnungsnummer
+                                </Label>
+                                <Input
+                                  id="invoice-number"
+                                  placeholder="z.B. RE-12345"
+                                  className="col-span-3"
+                                />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="invoice-date" className="text-right">
+                                  Rechnungsdatum
+                                </Label>
+                                <Input
+                                  id="invoice-date"
+                                  type="date"
+                                  className="col-span-3"
+                                />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="invoice-amount" className="text-right">
+                                  Betrag (€)
+                                </Label>
+                                <Input
+                                  id="invoice-amount"
+                                  type="number"
+                                  placeholder="0.00"
+                                  className="col-span-3"
+                                />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="invoice-vendor" className="text-right">
+                                  Lieferant
+                                </Label>
+                                <Input
+                                  id="invoice-vendor"
+                                  placeholder="Name des Lieferanten"
+                                  className="col-span-3"
+                                />
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <Button type="submit">Rechnung hinzufügen</Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Mieteingänge</CardTitle>
+                      <CardDescription>Übersicht der Mieteingänge nach Einheiten</CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Einheit</TableHead>
+                            <TableHead>Mieter</TableHead>
+                            <TableHead>Betrag</TableHead>
+                            <TableHead>Fälligkeit</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Aktionen</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {property.units_list
+                            .filter(unit => unit.status === "rented")
+                            .map((unit) => (
+                            <TableRow key={unit.id}>
+                              <TableCell className="font-medium">{unit.name}</TableCell>
+                              <TableCell>{unit.tenant}</TableCell>
+                              <TableCell>{unit.baseRent + unit.additionalCosts} €</TableCell>
+                              <TableCell>01.04.2025</TableCell>
+                              <TableCell>
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                  Ausstehend
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button variant="outline" size="sm">
+                                  Als bezahlt markieren
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
                     </div>
                   </CardContent>
                 </Card>
