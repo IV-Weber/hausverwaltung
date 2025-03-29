@@ -190,6 +190,12 @@ const properties = {
 export default function PropertyDetail() {
   const router = useRouter();
   const { id, type } = router.query;
+  const [selectedStatus, setSelectedStatus] = useState<string | undefined>();
+  
+  // Function to handle status change
+  const handleStatusChange = (value: string) => {
+    setSelectedStatus(value);
+  };
   
   // Determine which property list to use based on the type
   const propertyList = type === "hausverwaltung" ? properties.hausverwaltung : properties.wegVerwaltung;
@@ -358,11 +364,41 @@ export default function PropertyDetail() {
                             </Label>
                             <Input id="additionalCosts" type="number" placeholder="200" className="col-span-3" />
                           </div>
+                          
+                          {/* Ausstattung: Küche und Bad */}
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label className="text-right">
+                              Ausstattung
+                            </Label>
+                            <div className="col-span-3 flex space-x-4">
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  id="hasKitchen"
+                                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                />
+                                <Label htmlFor="hasKitchen" className="text-sm font-normal">
+                                  Küche
+                                </Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  id="hasBathroom"
+                                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                />
+                                <Label htmlFor="hasBathroom" className="text-sm font-normal">
+                                  Bad
+                                </Label>
+                              </div>
+                            </div>
+                          </div>
+                          
                           <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="status" className="text-right">
                               Status
                             </Label>
-                            <Select>
+                            <Select id="status" onValueChange={handleStatusChange}>
                               <SelectTrigger className="col-span-3">
                                 <SelectValue placeholder="Status auswählen" />
                               </SelectTrigger>
@@ -375,6 +411,41 @@ export default function PropertyDetail() {
                               </SelectContent>
                             </Select>
                           </div>
+                          
+                          {/* Conditional tenant fields */}
+                          <div id="tenantFields" className={`space-y-4 ${selectedStatus === 'rented' ? 'block' : 'hidden'}`}>
+                            <Separator className="my-2" />
+                            <h4 className="font-medium">Mieterdaten</h4>
+                            
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="tenantName" className="text-right">
+                                Name
+                              </Label>
+                              <Input id="tenantName" placeholder="Name des Mieters" className="col-span-3" />
+                            </div>
+                            
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="tenantEmail" className="text-right">
+                                E-Mail
+                              </Label>
+                              <Input id="tenantEmail" type="email" placeholder="E-Mail-Adresse" className="col-span-3" />
+                            </div>
+                            
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="tenantPhone" className="text-right">
+                                Telefon
+                              </Label>
+                              <Input id="tenantPhone" placeholder="Telefonnummer" className="col-span-3" />
+                            </div>
+                            
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="tenantStartDate" className="text-right">
+                                Mietbeginn
+                              </Label>
+                              <Input id="tenantStartDate" type="date" className="col-span-3" />
+                            </div>
+                          </div>
+                          
                           {type === "wegVerwaltung" && (
                             <div className="grid grid-cols-4 items-center gap-4">
                               <Label htmlFor="owner" className="text-right">
