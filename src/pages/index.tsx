@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -8,40 +8,113 @@ import { useRouter } from "next/router";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Cell, Legend, Pie, PieChart as RechartsPieChart, ResponsiveContainer } from "recharts";
 
+// Define types for our statistics
+type PropertyStatistics = {
+  hausverwaltung: number;
+  wegVerwaltung: number;
+  total: number;
+};
+
+type ContactStatistics = {
+  eigentuemer: number;
+  mieter: number;
+  dienstleister: number;
+  total: number;
+};
+
+type UnitStatistics = {
+  wohneinheiten: number;
+  gewerbeeinheiten: number;
+  hausverwaltungUnits: number;
+  wegVerwaltungUnits: number;
+  total: number;
+};
+
+type OccupancyStatistics = {
+  vermietet: number;
+  selbstbewohnt: number;
+  leerstand: number;
+  vermieteteWohneinheiten: number;
+  vermieteteGewerbeeinheiten: number;
+  selbstbewohnteWohneinheiten: number;
+  leerstandWohneinheiten: number;
+  leerstandGewerbeeinheiten: number;
+  total: number;
+};
+
 export default function Dashboard() {
   const router = useRouter();
   
+  // State for statistics
+  const [propertyStats, setPropertyStats] = useState<PropertyStatistics | null>(null);
+  const [contactStats, setContactStats] = useState<ContactStatistics | null>(null);
+  const [unitStats, setUnitStats] = useState<UnitStatistics | null>(null);
+  const [occupancyStats, setOccupancyStats] = useState<OccupancyStatistics | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Fetch statistics data
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch all statistics in parallel
+        const [propertyRes, contactRes, unitRes, occupancyRes] = await Promise.all([
+          fetch('/api/statistics/properties'),
+          fetch('/api/statistics/contacts'),
+          fetch('/api/statistics/units'),
+          fetch('/api/statistics/occupancy')
+        ]);
+        
+        const propertyData = await propertyRes.json();
+        const contactData = await contactRes.json();
+        const unitData = await unitRes.json();
+        const occupancyData = await occupancyRes.json();
+        
+        setPropertyStats(propertyData);
+        setContactStats(contactData);
+        setUnitStats(unitData);
+        setOccupancyStats(occupancyData);
+      } catch (error) {
+        console.error('Error fetching statistics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchStatistics();
+  }, []);
+  
   // Placeholder data for dashboard metrics
   const metrics = {
-    properties: 12,
-    apartments: 87,
-    commercialUnits: 14,
-    contacts: 156,
+    properties: propertyStats?.total || 0,
+    apartments: unitStats?.wohneinheiten || 0,
+    commercialUnits: unitStats?.gewerbeeinheiten || 0,
+    contacts: contactStats?.total || 0,
     archivedDocuments: 243,
   };
 
-  // Placeholder data for pie charts
+  // Create chart data from fetched statistics
   const propertyTypeData = [
-    { name: "WEG-Verwaltung", value: 7, fill: "#0ea5e9" },
-    { name: "Hausverwaltung", value: 5, fill: "#8b5cf6" },
+    { name: "WEG-Verwaltung", value: propertyStats?.wegVerwaltung || 0, fill: "#0ea5e9" },
+    { name: "Hausverwaltung", value: propertyStats?.hausverwaltung || 0, fill: "#8b5cf6" },
   ];
 
   const contactTypeData = [
-    { name: "Eigentümer", value: 68, fill: "#10b981" },
-    { name: "Mieter", value: 76, fill: "#f59e0b" },
-    { name: "Dienstleister", value: 12, fill: "#ef4444" },
+    { name: "Eigentümer", value: contactStats?.eigentuemer || 0, fill: "#10b981" },
+    { name: "Mieter", value: contactStats?.mieter || 0, fill: "#f59e0b" },
+    { name: "Dienstleister", value: contactStats?.dienstleister || 0, fill: "#ef4444" },
   ];
 
   const unitTypeData = [
-    { name: "WE", value: 87, fill: "#0ea5e9" },
-    { name: "GE", value: 14, fill: "#8b5cf6" },
+    { name: "Wohneinheiten", value: unitStats?.wohneinheiten || 0, fill: "#0ea5e9" },
+    { name: "Gewerbeeinheiten", value: unitStats?.gewerbeeinheiten || 0, fill: "#8b5cf6" },
   ];
 
   const occupancyData = [
-    { name: "Vermietet (WE)", value: 82, fill: "#10b981" },
-    { name: "Leerstand (WE)", value: 5, fill: "#f59e0b" },
-    { name: "Vermietet (GE)", value: 12, fill: "#0ea5e9" },
-    { name: "Leerstand (GE)", value: 2, fill: "#ef4444" },
+    { name: "Vermietet", value: occupancyStats?.vermietet || 0, fill: "#10b981" },
+    { name: "Selbstbewohnt", value: occupancyStats?.selbstbewohnt || 0, fill: "#0ea5e9" },
+    { name: "Leerstand", value: occupancyStats?.leerstand || 0, fill: "#ef4444" },
   ];
 
   // Placeholder data for upcoming appointments
@@ -112,7 +185,7 @@ export default function Dashboard() {
                         {propertyTypeData.map((item, index) => (
                           <li key={index} className="flex items-center">
                             <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.fill }}></div>
-                            <span className="text-sm">{item.name}: {item.value} ({((item.value / metrics.properties) * 100).toFixed(0)}%)</span>
+                            <span className="text-sm">{item.name}: {item.value} ({metrics.properties > 0 ? ((item.value / metrics.properties) * 100).toFixed(0) : 0}%)</span>
                           </li>
                         ))}
                       </ul>
@@ -168,7 +241,7 @@ export default function Dashboard() {
                         {contactTypeData.map((item, index) => (
                           <li key={index} className="flex items-center">
                             <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.fill }}></div>
-                            <span className="text-sm">{item.name}: {item.value} ({((item.value / metrics.contacts) * 100).toFixed(0)}%)</span>
+                            <span className="text-sm">{item.name}: {item.value} ({metrics.contacts > 0 ? ((item.value / metrics.contacts) * 100).toFixed(0) : 0}%)</span>
                           </li>
                         ))}
                       </ul>
@@ -214,7 +287,7 @@ export default function Dashboard() {
                     Einheitenübersicht
                   </CardTitle>
                   <CardDescription>
-                    Verhältnis von WE zu GE
+                    Verhältnis von Wohneinheiten zu Gewerbeeinheiten
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-2">
@@ -224,7 +297,7 @@ export default function Dashboard() {
                         {unitTypeData.map((item, index) => (
                           <li key={index} className="flex items-center">
                             <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.fill }}></div>
-                            <span className="text-sm">{item.name}: {item.value} ({((item.value / (metrics.apartments + metrics.commercialUnits)) * 100).toFixed(0)}%)</span>
+                            <span className="text-sm">{item.name}: {item.value} ({(metrics.apartments + metrics.commercialUnits) > 0 ? ((item.value / (metrics.apartments + metrics.commercialUnits)) * 100).toFixed(0) : 0}%)</span>
                           </li>
                         ))}
                       </ul>
@@ -270,7 +343,7 @@ export default function Dashboard() {
                     Auslastungen
                   </CardTitle>
                   <CardDescription>
-                    Vermietungsquote für WE und GE
+                    Vermietungsquote für Wohn- und Gewerbeeinheiten
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-2">
@@ -280,12 +353,16 @@ export default function Dashboard() {
                         {occupancyData.map((item, index) => (
                           <li key={index} className="flex items-center">
                             <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: item.fill }}></div>
-                            <span className="text-sm">{item.name}: {item.value} ({((item.value / (metrics.apartments + metrics.commercialUnits)) * 100).toFixed(0)}%)</span>
+                            <span className="text-sm">{item.name}: {item.value} ({(metrics.apartments + metrics.commercialUnits) > 0 ? ((item.value / (metrics.apartments + metrics.commercialUnits)) * 100).toFixed(0) : 0}%)</span>
                           </li>
                         ))}
                       </ul>
                       <div className="mt-4">
-                        <div className="font-bold">Vermietungsquote: 94%</div>
+                        {occupancyStats && (
+                          <div className="font-bold">
+                            Vermietungsquote: {((occupancyStats.vermietet / (metrics.apartments + metrics.commercialUnits)) * 100).toFixed(0)}%
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="w-2/3 h-[200px]">
