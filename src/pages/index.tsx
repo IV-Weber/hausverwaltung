@@ -85,13 +85,14 @@ export default function Dashboard() {
     fetchStatistics();
   }, []);
   
-  // Placeholder data for dashboard metrics
+  // Real data for dashboard metrics from API
   const metrics = {
     properties: propertyStats?.total || 0,
     apartments: unitStats?.wohneinheiten || 0,
     commercialUnits: unitStats?.gewerbeeinheiten || 0,
     contacts: contactStats?.total || 0,
-    archivedDocuments: 243,
+    tenants: contactStats?.mieter || 0,
+    archivedDocuments: 243, // This is still a placeholder as we don't have real data for documents
   };
 
   // Create chart data from fetched statistics

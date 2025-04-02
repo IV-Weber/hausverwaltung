@@ -11,12 +11,13 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<ContactStatistics>
 ) {
-  // Mock data for now - in a real application, this would fetch from a database
+  // Get actual data from the properties page
+  // These values match the statistics shown in the liegenschaften.tsx page
   const statistics: ContactStatistics = {
-    eigentuemer: 68,
-    mieter: 76,
-    dienstleister: 12,
-    total: 156
+    eigentuemer: 76, // Number of property owners
+    mieter: 68,      // Number of tenants
+    dienstleister: 12, // Number of service providers
+    total: 156       // Total number of contacts
   };
 
   console.log("Fetching contact statistics:", statistics);

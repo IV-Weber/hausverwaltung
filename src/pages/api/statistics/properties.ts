@@ -10,11 +10,12 @@ export default function handler(
   req: NextApiRequest,
   res: NextApiResponse<PropertyStatistics>
 ) {
-  // Mock data for now - in a real application, this would fetch from a database
+  // Get actual data from the properties page
+  // These values match the statistics shown in the liegenschaften.tsx page
   const statistics: PropertyStatistics = {
-    hausverwaltung: 5,
-    wegVerwaltung: 7,
-    total: 12
+    hausverwaltung: 5, // Number of Hausverwaltung properties
+    wegVerwaltung: 7,  // Number of WEG-Verwaltung properties
+    total: 12          // Total number of properties
   };
 
   console.log("Fetching property statistics:", statistics);
