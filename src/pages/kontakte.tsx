@@ -3,11 +3,112 @@ import Head from "next/head";
 import Header from "@/components/Header";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, User, Home, Building, Phone, Mail } from "lucide-react";
+import { Users, User, Building, Phone, Mail, MapPin, FileText, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+
+type ContactType = 'eigentuemer' | 'mieter' | 'dienstleister';
+
+interface ContactFormData {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  notes: string;
+}
 
 export default function Kontakte() {
-  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<ContactType | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<ContactFormData>({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    notes: '',
+  });
+  const { toast } = useToast();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddContact = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name.trim()) {
+      toast({
+        title: "Fehler",
+        description: "Name ist ein Pflichtfeld",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/contacts/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: selectedType,
+          ...formData,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: "Erfolg",
+          description: "Kontakt wurde erfolgreich hinzugefügt",
+        });
+        
+        // Reset form and close dialog
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          address: '',
+          notes: '',
+        });
+        setIsAddDialogOpen(false);
+      } else {
+        throw new Error(data.message || "Fehler beim Hinzufügen des Kontakts");
+      }
+    } catch (error) {
+      console.error("Error adding contact:", error);
+      toast({
+        title: "Fehler",
+        description: error instanceof Error ? error.message : "Fehler beim Hinzufügen des Kontakts",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getContactTypeLabel = (type: ContactType | null) => {
+    switch (type) {
+      case 'eigentuemer':
+        return 'Eigentümer';
+      case 'mieter':
+        return 'Mieter';
+      case 'dienstleister':
+        return 'Dienstleister';
+      default:
+        return '';
+    }
+  };
 
   return (
     <>
@@ -77,11 +178,7 @@ export default function Kontakte() {
               <div>
                 <div className="mb-6 flex items-center justify-between">
                   <h2 className="text-2xl font-semibold">
-                    {selectedType === "eigentuemer" 
-                      ? "Eigentümer" 
-                      : selectedType === "mieter" 
-                        ? "Mieter" 
-                        : "Dienstleister"}
+                    {getContactTypeLabel(selectedType)}
                   </h2>
                   <Button variant="outline" onClick={() => setSelectedType(null)}>
                     Zurück zur Auswahl
@@ -95,38 +192,29 @@ export default function Kontakte() {
                     <TabsTrigger value="inactive">Inaktiv</TabsTrigger>
                   </TabsList>
                   
+                  <div className="mb-4 flex justify-end">
+                    <Button onClick={() => setIsAddDialogOpen(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      {getContactTypeLabel(selectedType)} hinzufügen
+                    </Button>
+                  </div>
+                  
                   <TabsContent value="all">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Alle {selectedType === "eigentuemer" 
-                          ? "Eigentümer" 
-                          : selectedType === "mieter" 
-                            ? "Mieter" 
-                            : "Dienstleister"}</CardTitle>
+                        <CardTitle>Alle {getContactTypeLabel(selectedType)}</CardTitle>
                         <CardDescription>
-                          Übersicht aller {selectedType === "eigentuemer" 
-                          ? "Eigentümer" 
-                          : selectedType === "mieter" 
-                            ? "Mieter" 
-                            : "Dienstleister"}
+                          Übersicht aller {getContactTypeLabel(selectedType)}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="text-center py-8">
                           <Users className="h-12 w-12 mx-auto text-muted-foreground" />
                           <p className="mt-4 text-muted-foreground">
-                            Keine {selectedType === "eigentuemer" 
-                              ? "Eigentümer" 
-                              : selectedType === "mieter" 
-                                ? "Mieter" 
-                                : "Dienstleister"} vorhanden
+                            Keine {getContactTypeLabel(selectedType)} vorhanden
                           </p>
-                          <Button className="mt-4">
-                            {selectedType === "eigentuemer" 
-                              ? "Eigentümer" 
-                              : selectedType === "mieter" 
-                                ? "Mieter" 
-                                : "Dienstleister"} hinzufügen
+                          <Button className="mt-4" onClick={() => setIsAddDialogOpen(true)}>
+                            {getContactTypeLabel(selectedType)} hinzufügen
                           </Button>
                         </div>
                       </CardContent>
@@ -136,35 +224,19 @@ export default function Kontakte() {
                   <TabsContent value="active">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Aktive {selectedType === "eigentuemer" 
-                          ? "Eigentümer" 
-                          : selectedType === "mieter" 
-                            ? "Mieter" 
-                            : "Dienstleister"}</CardTitle>
+                        <CardTitle>Aktive {getContactTypeLabel(selectedType)}</CardTitle>
                         <CardDescription>
-                          Übersicht aktiver {selectedType === "eigentuemer" 
-                          ? "Eigentümer" 
-                          : selectedType === "mieter" 
-                            ? "Mieter" 
-                            : "Dienstleister"}
+                          Übersicht aktiver {getContactTypeLabel(selectedType)}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="text-center py-8">
                           <Users className="h-12 w-12 mx-auto text-muted-foreground" />
                           <p className="mt-4 text-muted-foreground">
-                            Keine aktiven {selectedType === "eigentuemer" 
-                              ? "Eigentümer" 
-                              : selectedType === "mieter" 
-                                ? "Mieter" 
-                                : "Dienstleister"} vorhanden
+                            Keine aktiven {getContactTypeLabel(selectedType)} vorhanden
                           </p>
-                          <Button className="mt-4">
-                            {selectedType === "eigentuemer" 
-                              ? "Eigentümer" 
-                              : selectedType === "mieter" 
-                                ? "Mieter" 
-                                : "Dienstleister"} hinzufügen
+                          <Button className="mt-4" onClick={() => setIsAddDialogOpen(true)}>
+                            {getContactTypeLabel(selectedType)} hinzufügen
                           </Button>
                         </div>
                       </CardContent>
@@ -174,28 +246,16 @@ export default function Kontakte() {
                   <TabsContent value="inactive">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Inaktive {selectedType === "eigentuemer" 
-                          ? "Eigentümer" 
-                          : selectedType === "mieter" 
-                            ? "Mieter" 
-                            : "Dienstleister"}</CardTitle>
+                        <CardTitle>Inaktive {getContactTypeLabel(selectedType)}</CardTitle>
                         <CardDescription>
-                          Übersicht inaktiver {selectedType === "eigentuemer" 
-                          ? "Eigentümer" 
-                          : selectedType === "mieter" 
-                            ? "Mieter" 
-                            : "Dienstleister"}
+                          Übersicht inaktiver {getContactTypeLabel(selectedType)}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="text-center py-8">
                           <Users className="h-12 w-12 mx-auto text-muted-foreground" />
                           <p className="mt-4 text-muted-foreground">
-                            Keine inaktiven {selectedType === "eigentuemer" 
-                              ? "Eigentümer" 
-                              : selectedType === "mieter" 
-                                ? "Mieter" 
-                                : "Dienstleister"} vorhanden
+                            Keine inaktiven {getContactTypeLabel(selectedType)} vorhanden
                           </p>
                         </div>
                       </CardContent>
@@ -207,6 +267,97 @@ export default function Kontakte() {
           </div>
         </main>
       </div>
+
+      {/* Add Contact Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{getContactTypeLabel(selectedType)} hinzufügen</DialogTitle>
+            <DialogDescription>
+              Fügen Sie einen neuen {getContactTypeLabel(selectedType)} hinzu. Füllen Sie die erforderlichen Felder aus.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAddContact}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Name*
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="email" className="text-right">
+                  <Mail className="h-4 w-4 inline mr-1" />
+                  E-Mail
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="phone" className="text-right">
+                  <Phone className="h-4 w-4 inline mr-1" />
+                  Telefon
+                </Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="address" className="text-right">
+                  <MapPin className="h-4 w-4 inline mr-1" />
+                  Adresse
+                </Label>
+                <Input
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="notes" className="text-right">
+                  <FileText className="h-4 w-4 inline mr-1" />
+                  Notizen
+                </Label>
+                <Textarea
+                  id="notes"
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                Abbrechen
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Wird hinzugefügt..." : "Hinzufügen"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
