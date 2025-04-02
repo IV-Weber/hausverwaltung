@@ -5,13 +5,149 @@ import { useRouter } from "next/router";
 import Header from "@/components/Header";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Building, Home, Users, BarChart3, DoorClosed, UserCheck, MapPin, ArrowRight } from "lucide-react";
+import { Building, Home, Users, BarChart3, DoorClosed, UserCheck, MapPin, ArrowRight, Plus, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Liegenschaften() {
   const router = useRouter();
   const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  
+  // Form state for new property
+  const [newProperty, setNewProperty] = useState({
+    name: "",
+    address: "",
+    buildYear: new Date().getFullYear(),
+    units: 0,
+    owner: "",
+    image: "/images/rect.png"
+  });
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNewProperty(prev => ({
+      ...prev,
+      [name]: name === "buildYear" || name === "units" ? parseInt(value) || 0 : value
+    }));
+  };
+
+  // Handle add property
+  const handleAddProperty = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('/api/properties/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...newProperty,
+          // Add type-specific fields
+          ...(selectedType === "hausverwaltung" 
+            ? { monthlyRent: 0 } 
+            : { monthlyFee: 0 })
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // In a real app, we would update the properties list
+        // For now, we'll just show a success message
+        toast({
+          title: "Objekt hinzugefügt",
+          description: `${newProperty.name} wurde erfolgreich hinzugefügt.`,
+        });
+        
+        // Reset form and close dialog
+        setNewProperty({
+          name: "",
+          address: "",
+          buildYear: new Date().getFullYear(),
+          units: 0,
+          owner: "",
+          image: "/images/rect.png"
+        });
+        setIsAddDialogOpen(false);
+        
+        // Refresh the page to show the new property
+        router.reload();
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      console.error("Failed to add property:", error);
+      toast({
+        title: "Fehler",
+        description: "Das Objekt konnte nicht hinzugefügt werden. Bitte versuchen Sie es später erneut.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle delete property
+  const handleDeleteProperty = async () => {
+    if (!propertyToDelete) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch(`/api/properties/remove?id=${propertyToDelete}&type=${selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung"}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        toast({
+          title: "Objekt entfernt",
+          description: "Das Objekt wurde erfolgreich entfernt.",
+        });
+        
+        // Reset state and close dialog
+        setPropertyToDelete(null);
+        setIsDeleteDialogOpen(false);
+        
+        // Refresh the page to update the properties list
+        router.reload();
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      console.error("Failed to delete property:", error);
+      toast({
+        title: "Fehler",
+        description: "Das Objekt konnte nicht entfernt werden. Bitte versuchen Sie es später erneut.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Prevent event propagation when clicking on delete button
+  const handleDeleteClick = (e: React.MouseEvent, propertyId: string) => {
+    e.stopPropagation();
+    setPropertyToDelete(propertyId);
+    setIsDeleteDialogOpen(true);
+  };
   
   // Mock data for statistics
   const statistics = {
@@ -315,13 +451,120 @@ export default function Liegenschaften() {
                   
                   <TabsContent value="objects">
                     <Card>
-                      <CardHeader>
-                        <CardTitle>Objekte</CardTitle>
-                        <CardDescription>
-                          {selectedType === "hausverwaltung" 
-                            ? "Verwaltete Mietobjekte" 
-                            : "Verwaltete Eigentümergemeinschaften"}
-                        </CardDescription>
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                          <CardTitle>Objekte</CardTitle>
+                          <CardDescription>
+                            {selectedType === "hausverwaltung" 
+                              ? "Verwaltete Mietobjekte" 
+                              : "Verwaltete Eigentümergemeinschaften"}
+                          </CardDescription>
+                        </div>
+                        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button className="gap-1">
+                              <Plus className="h-4 w-4" /> Objekt hinzufügen
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[550px]">
+                            <form onSubmit={handleAddProperty}>
+                              <DialogHeader>
+                                <DialogTitle>Neues Objekt hinzufügen</DialogTitle>
+                                <DialogDescription>
+                                  {selectedType === "hausverwaltung" 
+                                    ? "Fügen Sie ein neues Mietobjekt hinzu." 
+                                    : "Fügen Sie eine neue Eigentümergemeinschaft hinzu."}
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <Label htmlFor="name" className="text-right">
+                                    Name
+                                  </Label>
+                                  <Input 
+                                    id="name" 
+                                    name="name"
+                                    value={newProperty.name}
+                                    onChange={handleInputChange}
+                                    placeholder={selectedType === "hausverwaltung" 
+                                      ? "z.B. Wohnanlage Sonnenblick" 
+                                      : "z.B. WEG Parkblick"} 
+                                    className="col-span-3" 
+                                    required
+                                  />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <Label htmlFor="address" className="text-right">
+                                    Adresse
+                                  </Label>
+                                  <Input 
+                                    id="address" 
+                                    name="address"
+                                    value={newProperty.address}
+                                    onChange={handleInputChange}
+                                    placeholder="Straße, PLZ Ort" 
+                                    className="col-span-3" 
+                                    required
+                                  />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <Label htmlFor="buildYear" className="text-right">
+                                    Baujahr
+                                  </Label>
+                                  <Input 
+                                    id="buildYear" 
+                                    name="buildYear"
+                                    type="number" 
+                                    value={newProperty.buildYear}
+                                    onChange={handleInputChange}
+                                    placeholder="z.B. 2010" 
+                                    className="col-span-3" 
+                                    required
+                                  />
+                                </div>
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                  <Label htmlFor="units" className="text-right">
+                                    Einheiten
+                                  </Label>
+                                  <Input 
+                                    id="units" 
+                                    name="units"
+                                    type="number" 
+                                    value={newProperty.units}
+                                    onChange={handleInputChange}
+                                    placeholder="Anzahl der Einheiten" 
+                                    className="col-span-3" 
+                                    required
+                                  />
+                                </div>
+                                {selectedType === "hausverwaltung" && (
+                                  <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="owner" className="text-right">
+                                      Eigentümer
+                                    </Label>
+                                    <Input 
+                                      id="owner" 
+                                      name="owner"
+                                      value={newProperty.owner}
+                                      onChange={handleInputChange}
+                                      placeholder="Name des Eigentümers" 
+                                      className="col-span-3" 
+                                      required
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                              <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                                  Abbrechen
+                                </Button>
+                                <Button type="submit" disabled={isLoading}>
+                                  {isLoading ? "Wird hinzugefügt..." : "Objekt hinzufügen"}
+                                </Button>
+                              </DialogFooter>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
                       </CardHeader>
                       <CardContent>
                         {selectedType && properties[selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung"].length > 0 ? (
@@ -336,7 +579,7 @@ export default function Liegenschaften() {
                                   {selectedType === "hausverwaltung" && (
                                     <th className="p-3 text-left font-medium">Eigentümer</th>
                                   )}
-                                  <th className="p-3 text-right font-medium"></th>
+                                  <th className="p-3 text-right font-medium">Aktionen</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -346,7 +589,7 @@ export default function Liegenschaften() {
                                   .map((property, index, sortedArray) => (
                                   <tr 
                                     key={property.id}
-                                    className={`cursor-pointer hover:bg-muted/50 ${index !== sortedArray.length - 1 ? 'border-b' : ''}`}
+                                    className={`hover:bg-muted/50 ${index !== sortedArray.length - 1 ? 'border-b' : ''}`}
                                     onClick={() => router.push({
                                       pathname: `/liegenschaften/${property.id}`,
                                       query: { type: selectedType === "hausverwaltung" ? "hausverwaltung" : "wegVerwaltung" }
@@ -360,9 +603,19 @@ export default function Liegenschaften() {
                                       <td className="p-3">{property.owner}</td>
                                     )}
                                     <td className="p-3 text-right">
-                                      <Button variant="ghost" size="sm" className="gap-1">
-                                        Details <ArrowRight className="h-3 w-3" />
-                                      </Button>
+                                      <div className="flex justify-end gap-2">
+                                        <Button variant="ghost" size="sm" className="gap-1">
+                                          Details <ArrowRight className="h-3 w-3" />
+                                        </Button>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm"
+                                          className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                                          onClick={(e) => handleDeleteClick(e, property.id)}
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </div>
                                     </td>
                                   </tr>
                                 ))}
@@ -373,11 +626,38 @@ export default function Liegenschaften() {
                           <div className="text-center py-8">
                             <Building className="h-12 w-12 mx-auto text-muted-foreground" />
                             <p className="mt-4 text-muted-foreground">Keine Objekte vorhanden</p>
-                            <Button className="mt-4">Objekt hinzufügen</Button>
+                            <Button 
+                              className="mt-4 gap-1"
+                              onClick={() => setIsAddDialogOpen(true)}
+                            >
+                              <Plus className="h-4 w-4" /> Objekt hinzufügen
+                            </Button>
                           </div>
                         )}
                       </CardContent>
                     </Card>
+                    
+                    {/* Delete Confirmation Dialog */}
+                    <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Objekt löschen</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Sind Sie sicher, dass Sie dieses Objekt löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel onClick={() => setPropertyToDelete(null)}>Abbrechen</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={handleDeleteProperty}
+                            className="bg-red-500 hover:bg-red-600"
+                            disabled={isLoading}
+                          >
+                            {isLoading ? "Wird gelöscht..." : "Löschen"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </TabsContent>
                   
 
