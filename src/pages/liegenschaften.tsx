@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -24,6 +24,62 @@ export default function Liegenschaften() {
   const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  
+  // State for real statistics data
+  const [realStatistics, setRealStatistics] = useState({
+    properties: {
+      hausverwaltung: 0,
+      wegVerwaltung: 0,
+      total: 0
+    },
+    units: {
+      hausverwaltungUnits: 0,
+      wegVerwaltungUnits: 0,
+      total: 0
+    },
+    contacts: {
+      eigentuemer: 0,
+      mieter: 0,
+      total: 0
+    }
+  });
+  
+  // Fetch real statistics data
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        // Fetch property statistics
+        const propertiesResponse = await fetch('/api/statistics/properties');
+        const propertiesData = await propertiesResponse.json();
+        
+        // Fetch unit statistics
+        const unitsResponse = await fetch('/api/statistics/units');
+        const unitsData = await unitsResponse.json();
+        
+        // Fetch contact statistics
+        const contactsResponse = await fetch('/api/statistics/contacts');
+        const contactsData = await contactsResponse.json();
+        
+        // Update state with real data
+        setRealStatistics({
+          properties: propertiesData,
+          units: unitsData,
+          contacts: contactsData
+        });
+        
+        console.log("Fetched real statistics:", { propertiesData, unitsData, contactsData });
+      } catch (error) {
+        console.error("Failed to fetch statistics:", error);
+        toast({
+          title: "Fehler",
+          description: "Die Statistiken konnten nicht geladen werden.",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    fetchStatistics();
+  }, [toast]);
   
   // Form state for new property
   const [newProperty, setNewProperty] = useState({
@@ -298,8 +354,8 @@ export default function Liegenschaften() {
                             <CardContent>
                               <p className="text-3xl font-bold">
                                 {selectedType === "hausverwaltung" 
-                                  ? statistics.hausverwaltung.buildings 
-                                  : statistics.wegVerwaltung.buildings}
+                                  ? realStatistics.properties.hausverwaltung 
+                                  : realStatistics.properties.wegVerwaltung}
                               </p>
                             </CardContent>
                           </Card>
@@ -311,8 +367,8 @@ export default function Liegenschaften() {
                             <CardContent>
                               <p className="text-3xl font-bold">
                                 {selectedType === "hausverwaltung" 
-                                  ? statistics.hausverwaltung.units 
-                                  : statistics.wegVerwaltung.units}
+                                  ? realStatistics.units.hausverwaltungUnits 
+                                  : realStatistics.units.wegVerwaltungUnits}
                               </p>
                             </CardContent>
                           </Card>
@@ -326,8 +382,8 @@ export default function Liegenschaften() {
                             <CardContent>
                               <p className="text-3xl font-bold">
                                 {selectedType === "hausverwaltung" 
-                                  ? statistics.hausverwaltung.tenants 
-                                  : statistics.wegVerwaltung.owners}
+                                  ? realStatistics.contacts.mieter 
+                                  : realStatistics.contacts.eigentuemer}
                               </p>
                             </CardContent>
                           </Card>
@@ -350,8 +406,8 @@ export default function Liegenschaften() {
                                   </div>
                                   <span className="font-medium">
                                     {selectedType === "hausverwaltung" 
-                                      ? statistics.hausverwaltung.buildings 
-                                      : statistics.wegVerwaltung.buildings}
+                                      ? realStatistics.properties.hausverwaltung 
+                                      : realStatistics.properties.wegVerwaltung}
                                   </span>
                                 </div>
                                 <div className="flex items-center justify-between">
@@ -361,8 +417,8 @@ export default function Liegenschaften() {
                                   </div>
                                   <span className="font-medium">
                                     {selectedType === "hausverwaltung" 
-                                      ? statistics.hausverwaltung.units 
-                                      : statistics.wegVerwaltung.units}
+                                      ? realStatistics.units.hausverwaltungUnits 
+                                      : realStatistics.units.wegVerwaltungUnits}
                                   </span>
                                 </div>
                                 <div className="flex items-center justify-between">
@@ -388,7 +444,7 @@ export default function Liegenschaften() {
                                       <UserCheck className="h-4 w-4 text-primary" />
                                       <span>Eigentümer</span>
                                     </div>
-                                    <span className="font-medium">{statistics.wegVerwaltung.owners}</span>
+                                    <span className="font-medium">{realStatistics.contacts.eigentuemer}</span>
                                   </div>
                                 )}
                                 <div className="flex items-center justify-between">
@@ -398,8 +454,8 @@ export default function Liegenschaften() {
                                   </div>
                                   <span className="font-medium">
                                     {selectedType === "hausverwaltung" 
-                                      ? statistics.hausverwaltung.tenants 
-                                      : statistics.wegVerwaltung.tenants}
+                                      ? realStatistics.contacts.mieter 
+                                      : realStatistics.contacts.mieter}
                                   </span>
                                 </div>
                               </div>
