@@ -1176,75 +1176,250 @@ export default function PropertyDetail() {
                             Erstellen Sie eine neue Abrechnung für diese Liegenschaft.
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="statement-type" className="text-right">
-                              Abrechnungstyp
-                            </Label>
-                            <Select>
-                              <SelectTrigger className="col-span-3">
-                                <SelectValue placeholder="Typ auswählen" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="owner">Eigentümerabrechnung</SelectItem>
-                                <SelectItem value="utilities">Nebenkostenabrechnung</SelectItem>
-                                <SelectItem value="profit-loss">Gewinn- und Verlustrechnung (GUV)</SelectItem>
-                                <SelectItem value="other">Sonstige Abrechnung</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="statement-period-start" className="text-right">
-                              Abrechnungszeitraum
-                            </Label>
-                            <div className="col-span-3 flex items-center gap-2">
-                              <div className="flex-1">
-                                <Label htmlFor="statement-period-start" className="sr-only">
-                                  Von
-                                </Label>
-                                <Input
-                                  id="statement-period-start"
-                                  type="date"
-                                  placeholder="Von"
-                                />
-                              </div>
-                              <span className="text-muted-foreground">bis</span>
-                              <div className="flex-1">
-                                <Label htmlFor="statement-period-end" className="sr-only">
-                                  Bis
-                                </Label>
-                                <Input
-                                  id="statement-period-end"
-                                  type="date"
-                                  placeholder="Bis"
-                                />
+                        <form id="create-statement-form">
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="statement-type" className="text-right">
+                                Abrechnungstyp
+                              </Label>
+                              <Select name="statementType" defaultValue="utilities">
+                                <SelectTrigger className="col-span-3">
+                                  <SelectValue placeholder="Typ auswählen" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="owner">Eigentümerabrechnung</SelectItem>
+                                  <SelectItem value="utilities">Nebenkostenabrechnung</SelectItem>
+                                  <SelectItem value="profit-loss">Gewinn- und Verlustrechnung (GUV)</SelectItem>
+                                  <SelectItem value="other">Sonstige Abrechnung</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="statement-period-start" className="text-right">
+                                Zeitraum
+                              </Label>
+                              <div className="col-span-3 flex items-center gap-2">
+                                <div className="flex-1">
+                                  <Label htmlFor="statement-period-start" className="sr-only">
+                                    Von
+                                  </Label>
+                                  <Input
+                                    id="statement-period-start"
+                                    name="periodStart"
+                                    type="date"
+                                    placeholder="Von"
+                                    required
+                                  />
+                                </div>
+                                <span className="text-muted-foreground">bis</span>
+                                <div className="flex-1">
+                                  <Label htmlFor="statement-period-end" className="sr-only">
+                                    Bis
+                                  </Label>
+                                  <Input
+                                    id="statement-period-end"
+                                    name="periodEnd"
+                                    type="date"
+                                    placeholder="Bis"
+                                    required
+                                  />
+                                </div>
                               </div>
                             </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="statement-title" className="text-right">
+                                Titel
+                              </Label>
+                              <Input
+                                id="statement-title"
+                                name="title"
+                                placeholder="z.B. Nebenkostenabrechnung 2025"
+                                className="col-span-3"
+                              />
+                            </div>
+                            
+                            {/* Nebenkostenabrechnung specific fields */}
+                            <div className="mt-4 mb-2">
+                              <h3 className="text-lg font-medium">Kostenpositionen</h3>
+                              <p className="text-sm text-muted-foreground">Fügen Sie die Kostenpositionen für die Nebenkostenabrechnung hinzu.</p>
+                            </div>
+                            
+                            <div className="space-y-4" id="cost-categories">
+                              <div className="grid grid-cols-12 gap-2 items-center">
+                                <Label className="col-span-3 font-medium">Kostenart</Label>
+                                <Label className="col-span-2 font-medium">Betrag (€)</Label>
+                                <Label className="col-span-3 font-medium">Umlageschlüssel</Label>
+                                <Label className="col-span-3 font-medium">Heizkosten</Label>
+                                <Label className="col-span-1 font-medium"></Label>
+                              </div>
+                              
+                              <div className="grid grid-cols-12 gap-2 items-center cost-category-row">
+                                <Input 
+                                  name="costCategory[0].name" 
+                                  placeholder="z.B. Grundsteuer" 
+                                  className="col-span-3"
+                                  required
+                                />
+                                <Input 
+                                  name="costCategory[0].amount" 
+                                  type="number" 
+                                  placeholder="0.00" 
+                                  className="col-span-2"
+                                  required
+                                />
+                                <Select name="costCategory[0].allocationMethod" defaultValue="area">
+                                  <SelectTrigger className="col-span-3">
+                                    <SelectValue placeholder="Umlageschlüssel" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="area">Nach Fläche</SelectItem>
+                                    <SelectItem value="units">Nach Einheiten</SelectItem>
+                                    <SelectItem value="consumption">Nach Verbrauch</SelectItem>
+                                    <SelectItem value="custom">Individuell</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <div className="col-span-3 flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    id="isHeatingCost-0"
+                                    name="costCategory[0].isHeatingCost"
+                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                  />
+                                  <Label htmlFor="isHeatingCost-0" className="text-sm font-normal">
+                                    Heizkosten
+                                  </Label>
+                                </div>
+                                <Button 
+                                  type="button" 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="col-span-1"
+                                  onClick={() => {
+                                    const row = document.querySelector('.cost-category-row');
+                                    if (row) {
+                                      const clone = row.cloneNode(true) as HTMLElement;
+                                      const inputs = clone.querySelectorAll('input, select');
+                                      const index = document.querySelectorAll('.cost-category-row').length;
+                                      
+                                      inputs.forEach(input => {
+                                        const name = input.getAttribute('name');
+                                        if (name) {
+                                          input.setAttribute('name', name.replace('[0]', `[${index}]`));
+                                        }
+                                        if (input.id && input.id.includes('isHeatingCost')) {
+                                          input.id = `isHeatingCost-${index}`;
+                                          const label = clone.querySelector(`label[for="isHeatingCost-0"]`);
+                                          if (label) {
+                                            label.setAttribute('for', `isHeatingCost-${index}`);
+                                          }
+                                        }
+                                        if (input.tagName.toLowerCase() !== 'select') {
+                                          (input as HTMLInputElement).value = '';
+                                        }
+                                      });
+                                      
+                                      document.getElementById('cost-categories')?.appendChild(clone);
+                                    }
+                                  }}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-4 items-center gap-4 mt-4">
+                              <Label htmlFor="statement-notes" className="text-right">
+                                Notizen
+                              </Label>
+                              <Textarea
+                                id="statement-notes"
+                                name="notes"
+                                placeholder="Zusätzliche Informationen zur Abrechnung"
+                                className="col-span-3"
+                              />
+                            </div>
                           </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="statement-title" className="text-right">
-                              Titel
-                            </Label>
-                            <Input
-                              id="statement-title"
-                              placeholder="z.B. Nebenkostenabrechnung 2025"
-                              className="col-span-3"
-                            />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="statement-notes" className="text-right">
-                              Notizen
-                            </Label>
-                            <Textarea
-                              id="statement-notes"
-                              placeholder="Zusätzliche Informationen zur Abrechnung"
-                              className="col-span-3"
-                            />
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button type="submit">Abrechnung erstellen</Button>
-                        </DialogFooter>
+                          <DialogFooter>
+                            <Button 
+                              type="button" 
+                              onClick={async () => {
+                                const form = document.getElementById('create-statement-form') as HTMLFormElement;
+                                const formData = new FormData(form);
+                                
+                                // Extract cost categories
+                                const costCategories: any[] = [];
+                                const entries = Array.from(formData.entries());
+                                
+                                // Group entries by index
+                                const categoryEntries = entries.filter(([key]) => key.startsWith('costCategory'));
+                                const indices = new Set<number>();
+                                
+                                categoryEntries.forEach(([key]) => {
+                                  const match = key.match(/costCategory\[(\d+)\]/);
+                                  if (match) {
+                                    indices.add(parseInt(match[1]));
+                                  }
+                                });
+                                
+                                // Create cost category objects
+                                indices.forEach(index => {
+                                  const name = formData.get(`costCategory[${index}].name`) as string;
+                                  const amount = parseFloat(formData.get(`costCategory[${index}].amount`) as string);
+                                  const allocationMethod = formData.get(`costCategory[${index}].allocationMethod`) as string;
+                                  const isHeatingCost = formData.has(`costCategory[${index}].isHeatingCost`);
+                                  
+                                  if (name && !isNaN(amount)) {
+                                    costCategories.push({
+                                      id: Math.random().toString(36).substring(2, 15),
+                                      name,
+                                      amount,
+                                      allocationMethod,
+                                      isHeatingCost
+                                    });
+                                  }
+                                });
+                                
+                                const data = {
+                                  propertyId: id,
+                                  type: formData.get('statementType'),
+                                  title: formData.get('title'),
+                                  periodStart: formData.get('periodStart'),
+                                  periodEnd: formData.get('periodEnd'),
+                                  costCategories,
+                                  notes: formData.get('notes')
+                                };
+                                
+                                try {
+                                  const response = await fetch('/api/statements/create', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify(data),
+                                  });
+                                  
+                                  const result = await response.json();
+                                  
+                                  if (result.success) {
+                                    alert('Nebenkostenabrechnung wurde erfolgreich erstellt!');
+                                    // Close dialog and reset form
+                                    const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]');
+                                    if (closeButton) {
+                                      (closeButton as HTMLButtonElement).click();
+                                    }
+                                  } else {
+                                    alert(`Fehler: ${result.message}`);
+                                  }
+                                } catch (error) {
+                                  console.error('Error creating statement:', error);
+                                  alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+                                }
+                              }}
+                            >
+                              Abrechnung erstellen
+                            </Button>
+                          </DialogFooter>
+                        </form>
                       </DialogContent>
                     </Dialog>
                   </CardHeader>
@@ -1265,68 +1440,253 @@ export default function PropertyDetail() {
                               Erstellen Sie eine neue Abrechnung für diese Liegenschaft.
                             </DialogDescription>
                           </DialogHeader>
-                          <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="statement-type" className="text-right">
-                                Abrechnungstyp
-                              </Label>
-                              <Select>
-                                <SelectTrigger className="col-span-3">
-                                  <SelectValue placeholder="Typ auswählen" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="owner">Eigentümerabrechnung</SelectItem>
-                                  <SelectItem value="utilities">Nebenkostenabrechnung</SelectItem>
-                                  <SelectItem value="profit-loss">Gewinn- und Verlustrechnung (GUV)</SelectItem>
-                                  {type === "wegVerwaltung" && (
-                                    <SelectItem value="wirtschaftsplan">Wirtschaftsplan</SelectItem>
-                                  )}
-                                  <SelectItem value="other">Sonstige Abrechnung</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="statement-period-start-2" className="text-right">
-                                Abrechnungszeitraum
-                              </Label>
-                              <div className="col-span-3 flex items-center gap-2">
-                                <div className="flex-1">
-                                  <Label htmlFor="statement-period-start-2" className="sr-only">
-                                    Von
-                                  </Label>
-                                  <Input
-                                    id="statement-period-start-2"
-                                    type="date"
-                                    placeholder="Von"
-                                  />
-                                </div>
-                                <span className="text-muted-foreground">bis</span>
-                                <div className="flex-1">
-                                  <Label htmlFor="statement-period-end-2" className="sr-only">
-                                    Bis
-                                  </Label>
-                                  <Input
-                                    id="statement-period-end-2"
-                                    type="date"
-                                    placeholder="Bis"
-                                  />
+                          <form id="create-statement-form-2">
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="statement-type-2" className="text-right">
+                                  Abrechnungstyp
+                                </Label>
+                                <Select name="statementType" defaultValue="utilities">
+                                  <SelectTrigger className="col-span-3">
+                                    <SelectValue placeholder="Typ auswählen" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="owner">Eigentümerabrechnung</SelectItem>
+                                    <SelectItem value="utilities">Nebenkostenabrechnung</SelectItem>
+                                    <SelectItem value="profit-loss">Gewinn- und Verlustrechnung (GUV)</SelectItem>
+                                    {type === "wegVerwaltung" && (
+                                      <SelectItem value="wirtschaftsplan">Wirtschaftsplan</SelectItem>
+                                    )}
+                                    <SelectItem value="other">Sonstige Abrechnung</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="statement-period-start-2" className="text-right">
+                                  Zeitraum
+                                </Label>
+                                <div className="col-span-3 flex items-center gap-2">
+                                  <div className="flex-1">
+                                    <Label htmlFor="statement-period-start-2" className="sr-only">
+                                      Von
+                                    </Label>
+                                    <Input
+                                      id="statement-period-start-2"
+                                      name="periodStart"
+                                      type="date"
+                                      placeholder="Von"
+                                      required
+                                    />
+                                  </div>
+                                  <span className="text-muted-foreground">bis</span>
+                                  <div className="flex-1">
+                                    <Label htmlFor="statement-period-end-2" className="sr-only">
+                                      Bis
+                                    </Label>
+                                    <Input
+                                      id="statement-period-end-2"
+                                      name="periodEnd"
+                                      type="date"
+                                      placeholder="Bis"
+                                      required
+                                    />
+                                  </div>
                                 </div>
                               </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="statement-title-2" className="text-right">
+                                  Titel
+                                </Label>
+                                <Input
+                                  id="statement-title-2"
+                                  name="title"
+                                  placeholder="z.B. Nebenkostenabrechnung 2025"
+                                  className="col-span-3"
+                                />
+                              </div>
+                              
+                              {/* Nebenkostenabrechnung specific fields */}
+                              <div className="mt-4 mb-2">
+                                <h3 className="text-lg font-medium">Kostenpositionen</h3>
+                                <p className="text-sm text-muted-foreground">Fügen Sie die Kostenpositionen für die Nebenkostenabrechnung hinzu.</p>
+                              </div>
+                              
+                              <div className="space-y-4" id="cost-categories-2">
+                                <div className="grid grid-cols-12 gap-2 items-center">
+                                  <Label className="col-span-3 font-medium">Kostenart</Label>
+                                  <Label className="col-span-2 font-medium">Betrag (€)</Label>
+                                  <Label className="col-span-3 font-medium">Umlageschlüssel</Label>
+                                  <Label className="col-span-3 font-medium">Heizkosten</Label>
+                                  <Label className="col-span-1 font-medium"></Label>
+                                </div>
+                                
+                                <div className="grid grid-cols-12 gap-2 items-center cost-category-row-2">
+                                  <Input 
+                                    name="costCategory[0].name" 
+                                    placeholder="z.B. Grundsteuer" 
+                                    className="col-span-3"
+                                    required
+                                  />
+                                  <Input 
+                                    name="costCategory[0].amount" 
+                                    type="number" 
+                                    placeholder="0.00" 
+                                    className="col-span-2"
+                                    required
+                                  />
+                                  <Select name="costCategory[0].allocationMethod" defaultValue="area">
+                                    <SelectTrigger className="col-span-3">
+                                      <SelectValue placeholder="Umlageschlüssel" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="area">Nach Fläche</SelectItem>
+                                      <SelectItem value="units">Nach Einheiten</SelectItem>
+                                      <SelectItem value="consumption">Nach Verbrauch</SelectItem>
+                                      <SelectItem value="custom">Individuell</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <div className="col-span-3 flex items-center space-x-2">
+                                    <input
+                                      type="checkbox"
+                                      id="isHeatingCost-2-0"
+                                      name="costCategory[0].isHeatingCost"
+                                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                    />
+                                    <Label htmlFor="isHeatingCost-2-0" className="text-sm font-normal">
+                                      Heizkosten
+                                    </Label>
+                                  </div>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="col-span-1"
+                                    onClick={() => {
+                                      const row = document.querySelector('.cost-category-row-2');
+                                      if (row) {
+                                        const clone = row.cloneNode(true) as HTMLElement;
+                                        const inputs = clone.querySelectorAll('input, select');
+                                        const index = document.querySelectorAll('.cost-category-row-2').length;
+                                        
+                                        inputs.forEach(input => {
+                                          const name = input.getAttribute('name');
+                                          if (name) {
+                                            input.setAttribute('name', name.replace('[0]', `[${index}]`));
+                                          }
+                                          if (input.id && input.id.includes('isHeatingCost-2')) {
+                                            input.id = `isHeatingCost-2-${index}`;
+                                            const label = clone.querySelector(`label[for="isHeatingCost-2-0"]`);
+                                            if (label) {
+                                              label.setAttribute('for', `isHeatingCost-2-${index}`);
+                                            }
+                                          }
+                                          if (input.tagName.toLowerCase() !== 'select') {
+                                            (input as HTMLInputElement).value = '';
+                                          }
+                                        });
+                                        
+                                        document.getElementById('cost-categories-2')?.appendChild(clone);
+                                      }
+                                    }}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              
+                              <div className="grid grid-cols-4 items-center gap-4 mt-4">
+                                <Label htmlFor="statement-notes-2" className="text-right">
+                                  Notizen
+                                </Label>
+                                <Textarea
+                                  id="statement-notes-2"
+                                  name="notes"
+                                  placeholder="Zusätzliche Informationen zur Abrechnung"
+                                  className="col-span-3"
+                                />
+                              </div>
                             </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="statement-title" className="text-right">
-                                Titel
-                              </Label>
-                              <Input
-                                id="statement-title"
-                                placeholder="z.B. Nebenkostenabrechnung 2025"
-                                className="col-span-3"
-                              />
-                            </div>
-                          </div>
-                          <DialogFooter>
-                            <Button type="submit">Abrechnung erstellen</Button>
-                          </DialogFooter>
+                            <DialogFooter>
+                              <Button 
+                                type="button" 
+                                onClick={async () => {
+                                  const form = document.getElementById('create-statement-form-2') as HTMLFormElement;
+                                  const formData = new FormData(form);
+                                  
+                                  // Extract cost categories
+                                  const costCategories: any[] = [];
+                                  const entries = Array.from(formData.entries());
+                                  
+                                  // Group entries by index
+                                  const categoryEntries = entries.filter(([key]) => key.startsWith('costCategory'));
+                                  const indices = new Set<number>();
+                                  
+                                  categoryEntries.forEach(([key]) => {
+                                    const match = key.match(/costCategory\[(\d+)\]/);
+                                    if (match) {
+                                      indices.add(parseInt(match[1]));
+                                    }
+                                  });
+                                  
+                                  // Create cost category objects
+                                  indices.forEach(index => {
+                                    const name = formData.get(`costCategory[${index}].name`) as string;
+                                    const amount = parseFloat(formData.get(`costCategory[${index}].amount`) as string);
+                                    const allocationMethod = formData.get(`costCategory[${index}].allocationMethod`) as string;
+                                    const isHeatingCost = formData.has(`costCategory[${index}].isHeatingCost`);
+                                    
+                                    if (name && !isNaN(amount)) {
+                                      costCategories.push({
+                                        id: Math.random().toString(36).substring(2, 15),
+                                        name,
+                                        amount,
+                                        allocationMethod,
+                                        isHeatingCost
+                                      });
+                                    }
+                                  });
+                                  
+                                  const data = {
+                                    propertyId: id,
+                                    type: formData.get('statementType'),
+                                    title: formData.get('title'),
+                                    periodStart: formData.get('periodStart'),
+                                    periodEnd: formData.get('periodEnd'),
+                                    costCategories,
+                                    notes: formData.get('notes')
+                                  };
+                                  
+                                  try {
+                                    const response = await fetch('/api/statements/create', {
+                                      method: 'POST',
+                                      headers: {
+                                        'Content-Type': 'application/json',
+                                      },
+                                      body: JSON.stringify(data),
+                                    });
+                                    
+                                    const result = await response.json();
+                                    
+                                    if (result.success) {
+                                      alert('Nebenkostenabrechnung wurde erfolgreich erstellt!');
+                                      // Close dialog and reset form
+                                      const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]');
+                                      if (closeButton) {
+                                        (closeButton as HTMLButtonElement).click();
+                                      }
+                                    } else {
+                                      alert(`Fehler: ${result.message}`);
+                                    }
+                                  } catch (error) {
+                                    console.error('Error creating statement:', error);
+                                    alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+                                  }
+                                }}
+                              >
+                                Abrechnung erstellen
+                              </Button>
+                            </DialogFooter>
+                          </form>
                         </DialogContent>
                       </Dialog>
                     </div>
