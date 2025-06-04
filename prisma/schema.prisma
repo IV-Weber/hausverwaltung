@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./node_modules/.prisma/client"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+model Property {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  type      String // "hausverwaltung" or "wegVerwaltung"
+  buildYear Int?
+  renovationYear Int?
+  owner     String?
+  image     String?
+  monthlyRent Float?
+  monthlyFee  Float?
+  
+  units     Unit[]
+  documents Document[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum UnitType {
+  RESIDENTIAL
+  COMMERCIAL
+  OTHER
+}
+
+enum UnitStatus {
+  RENTED
+  VACANT
+  SELF_OCCUPIED
+  UNKNOWN
+}
+
+model Unit {
+  id            String     @id @default(cuid())
+  name          String
+  area          Float?
+  rooms         Int?
+  status        UnitStatus @default(UNKNOWN)
+  type          UnitType   @default(RESIDENTIAL)
+  baseRent      Float?
+  additionalCosts Float?
+  
+  // Simplified tenant/owner info for now
+  tenantName    String?
+  tenantEmail   String?
+  tenantPhone   String?
+  rentStartDate DateTime?
+  ownerName     String? // For WEG units primarily
+
+  hasKitchen    Boolean? @default(false)
+  hasBathroom   Boolean? @default(false)
+
+  propertyId    String
+  property      Property   @relation(fields: [propertyId], references: [id])
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@unique([propertyId, name]) // Example: Ensure unit names are unique within a property
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // e.g., 'Mietvertrag', 'Protokoll', 'Rechnung'
+  date        DateTime @default(now())
+  filePath    String?  // Path to the stored file, if applicable
+  
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
