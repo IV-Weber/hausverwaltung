@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
@@ -14,13 +14,53 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { UnitStatus, UnitType } from '@prisma/client'; // Assuming these enums exist
 
-// Mock data for properties
-const properties = {
+// Define types for property data and statistics
+interface Unit {
+  id: string;
+  name: string;
+  area: number;
+  rooms: number;
+  status: string; 
+  tenant?: string | null;
+  owner?: string | null;
+  baseRent: number;
+  additionalCosts: number;
+}
+
+interface PropertyData {
+  id: string;
+  name: string;
+  address: string;
+  buildYear: number | null;
+  renovationYear?: number | null;
+  units: number; 
+  totalArea: number; 
+  monthlyRent?: number; 
+  monthlyFee?: number; 
+  owner?: string | null; 
+  image?: string;
+  units_list: Unit[];
+  type: 'hausverwaltung' | 'wegVerwaltung'; 
+}
+
+interface PropertyStatistics {
+  totalUnits: number;
+  residentialUnits: number;
+  commercialUnits: number;
+  rentedUnits: number;
+  vacantUnits: number;
+  selfOccupiedUnits: number;
+  totalArea: number;
+}
+
+const MOCK_PROPERTIES_DATA_SOURCE = {
   hausverwaltung: [
     {
       id: "1",
       name: "Wohnanlage Sonnenblick",
+      type: "hausverwaltung" as "hausverwaltung",
       address: "Sonnenallee 42, 10435 Berlin",
       buildYear: 1998,
       renovationYear: 2015,
@@ -30,160 +70,24 @@ const properties = {
       owner: "Immobilien GmbH Berlin",
       image: "/images/rect.png",
       units_list: [
-        { 
-          id: "101", 
-          name: "Wohnung 1A", 
-          area: 65, 
-          rooms: 2, 
-          status: "rented", 
-          tenant: "Max Mustermann",
-          baseRent: 750,
-          additionalCosts: 180
-        },
-        { 
-          id: "102", 
-          name: "Wohnung 1B", 
-          area: 85, 
-          rooms: 3, 
-          status: "rented", 
-          tenant: "Anna Schmidt",
-          baseRent: 950,
-          additionalCosts: 220
-        },
-        { 
-          id: "103", 
-          name: "Wohnung 2A", 
-          area: 75, 
-          rooms: 2, 
-          status: "vacant", 
-          tenant: null,
-          baseRent: 850,
-          additionalCosts: 200
-        },
-        { 
-          id: "104", 
-          name: "Wohnung 2B", 
-          area: 95, 
-          rooms: 4, 
-          status: "rented", 
-          tenant: "Familie Müller",
-          baseRent: 1100,
-          additionalCosts: 250
-        },
+        { id: "101", name: "Wohnung 1A", area: 65, rooms: 2, status: "rented", tenant: "Max Mustermann", baseRent: 750, additionalCosts: 180 },
+        { id: "102", name: "Wohnung 1B", area: 85, rooms: 3, status: "rented", tenant: "Anna Schmidt", baseRent: 950, additionalCosts: 220 },
       ]
     },
-    {
-      id: "2",
-      name: "Stadthaus Grüner Weg",
-      address: "Grüner Weg 15, 10115 Berlin",
-      buildYear: 2005,
-      renovationYear: 2020,
-      units: 8,
-      totalArea: 720,
-      monthlyRent: 11200,
-      owner: "Wohnbau AG",
-      image: "/images/rect.png",
-      units_list: [
-        { 
-          id: "201", 
-          name: "Wohnung 1", 
-          area: 80, 
-          rooms: 3, 
-          status: "rented", 
-          tenant: "Julia Weber",
-          baseRent: 900,
-          additionalCosts: 210
-        },
-        { 
-          id: "202", 
-          name: "Wohnung 2", 
-          area: 95, 
-          rooms: 4, 
-          status: "rented", 
-          tenant: "Thomas Becker",
-          baseRent: 1050,
-          additionalCosts: 240
-        },
-      ]
-    }
   ],
   wegVerwaltung: [
     {
       id: "3",
       name: "Eigentümergemeinschaft Parkblick",
+      type: "wegVerwaltung" as "wegVerwaltung",
       address: "Parkstraße 78, 10178 Berlin",
       buildYear: 2010,
-      renovationYear: null,
-      units: 24,
-      totalArea: 2150,
+      units: 24, 
+      totalArea: 2150, 
       monthlyFee: 4800,
       image: "/images/rect.png",
       units_list: [
-        { 
-          id: "301", 
-          name: "Wohnung 1A", 
-          area: 75, 
-          rooms: 3, 
-          status: "self-occupied", 
-          owner: "Dr. Klaus Schmidt",
-          baseRent: 0,
-          additionalCosts: 180
-        },
-        { 
-          id: "302", 
-          name: "Wohnung 1B", 
-          area: 65, 
-          rooms: 2, 
-          status: "rented", 
-          owner: "Sabine Müller", 
-          tenant: "Peter Wagner",
-          baseRent: 750,
-          additionalCosts: 170
-        },
-        { 
-          id: "303", 
-          name: "Wohnung 2A", 
-          area: 90, 
-          rooms: 4, 
-          status: "self-occupied", 
-          owner: "Familie Hoffmann",
-          baseRent: 0,
-          additionalCosts: 210
-        },
-      ]
-    },
-    {
-      id: "4",
-      name: "WEG Seeblick",
-      address: "Seestraße 120, 13353 Berlin",
-      buildYear: 2015,
-      renovationYear: null,
-      units: 18,
-      totalArea: 1650,
-      monthlyFee: 3600,
-      image: "/images/rect.png",
-      units_list: [
-        { 
-          id: "401", 
-          name: "Wohnung 1", 
-          area: 85, 
-          rooms: 3, 
-          status: "rented", 
-          owner: "Markus Fischer", 
-          tenant: "Laura König",
-          baseRent: 950,
-          additionalCosts: 220
-        },
-        { 
-          id: "402", 
-          name: "Wohnung 2", 
-          area: 110, 
-          rooms: 4, 
-          status: "self-occupied", 
-          owner: "Familie Schneider",
-          baseRent: 0,
-          additionalCosts: 260
-        },
+        { id: "301", name: "Wohnung 1A", area: 75, rooms: 3, status: "self-occupied", owner: "Dr. Klaus Schmidt", baseRent: 0, additionalCosts: 180 },
       ]
     }
   ]
@@ -191,27 +95,225 @@ const properties = {
 
 export default function PropertyDetail() {
   const router = useRouter();
-  const { id, type } = router.query;
+  const { id, type: queryType } = router.query; 
+
+  const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
+  const [stats, setStats] = useState<PropertyStatistics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>();
   const [selectedTransactionType, setSelectedTransactionType] = useState<string>("expense");
+  const [isSubmittingUnit, setIsSubmittingUnit] = useState(false);
+  const [addUnitDialogOpen, setAddUnitDialogOpen] = useState(false);
+  const [addDocumentDialogOpen, setAddDocumentDialogOpen] = useState(false);
+  const [isSubmittingDocument, setIsSubmittingDocument] = useState(false);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!id || typeof id !== 'string' || !queryType || typeof queryType !== 'string' || (queryType !== 'hausverwaltung' && queryType !== 'wegVerwaltung')) {
+        setError("Ungültige Liegenschafts-ID oder Typ.");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      setPropertyData(null);
+      setStats(null);
+
+      try {
+        const currentPropertyType = queryType as 'hausverwaltung' | 'wegVerwaltung';
+        const basePropertyList = MOCK_PROPERTIES_DATA_SOURCE[currentPropertyType];
+        const foundBaseProperty = basePropertyList.find(p => p.id === id);
+
+        if (!foundBaseProperty) {
+          setError("Liegenschaft nicht in Mock-Daten gefunden.");
+          setLoading(false);
+          return;
+        }
+        
+        const initialPropertyData: PropertyData = {
+            ...foundBaseProperty,
+            type: currentPropertyType
+        };
+        setPropertyData(initialPropertyData);
+
+        const statsRes = await fetch(`/api/statistics/property/${id}`);
+        if (!statsRes.ok) {
+          const errorData = await statsRes.json();
+          throw new Error(errorData.error || `Statistiken konnten nicht geladen werden: ${statsRes.status}`);
+        }
+        const statsData: PropertyStatistics = await statsRes.json();
+        setStats(statsData);
+
+      } catch (err: any) {
+        console.error("Fehler beim Laden der Liegenschaftsdetails oder Statistiken:", err);
+        setError(err.message || "Ein unbekannter Fehler ist aufgetreten.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [id, queryType]);
   
-  // Function to handle status change
-  const handleStatusChange = (value: string) => {
+  const handleUnitDialogStatusChange = (value: string) => {
     setSelectedStatus(value);
   };
   
-  // Function to handle transaction type change
   const handleTransactionTypeChange = (value: string) => {
     setSelectedTransactionType(value);
   };
+
+  const handleAddUnitSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!propertyData) return;
+
+    setIsSubmittingUnit(true);
+    
+    const formData = new FormData(event.currentTarget);
+    const unitDataPayload: any = {
+      propertyId: propertyData.id,
+      name: formData.get("add-unit-name") as string,
+      area: parseFloat(formData.get("add-unit-area") as string || "0"),
+      rooms: parseInt(formData.get("add-unit-rooms") as string || "0", 10),
+      status: selectedStatus as UnitStatus, // Relies on selectedStatus state
+      type: UnitType.RESIDENTIAL, // Default, consider adding a form field for this
+      baseRent: parseFloat(formData.get("add-unit-baseRent") as string || "0"),
+      additionalCosts: parseFloat(formData.get("add-unit-additionalCosts") as string || "0"),
+      hasKitchen: formData.get("add-unit-hasKitchen") === "on",
+      hasBathroom: formData.get("add-unit-hasBathroom") === "on",
+    };
+
+    if (selectedStatus === UnitStatus.RENTED) {
+        unitDataPayload.tenantName = formData.get("add-unit-tenantName") as string;
+        unitDataPayload.tenantEmail = formData.get("add-unit-tenantEmail") as string;
+        unitDataPayload.tenantPhone = formData.get("add-unit-tenantPhone") as string;
+        unitDataPayload.tenantStartDate = formData.get("add-unit-tenantStartDate") as string;
+    }
+    if (propertyData.type === 'wegVerwaltung' && formData.get("add-unit-owner")) {
+        unitDataPayload.ownerName = formData.get("add-unit-owner") as string;
+    }
+
+    if (!unitDataPayload.name || !unitDataPayload.status || isNaN(unitDataPayload.area) || unitDataPayload.area <= 0 || isNaN(unitDataPayload.rooms) || unitDataPayload.rooms <= 0) {
+      alert("Bitte füllen Sie alle erforderlichen Felder für die Einheit korrekt aus (Name, Fläche > 0, Zimmer > 0, Status).");
+      setIsSubmittingUnit(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/units/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(unitDataPayload),
+      });
+
+      if (!response.ok) {
+        const errorResult = await response.json();
+        throw new Error(errorResult.error || `Fehler beim Hinzufügen der Einheit: ${response.statusText}`);
+      }
+
+      const successResult = await response.json();
+      alert(successResult.message);
+      setAddUnitDialogOpen(false); 
+      setSelectedStatus(undefined); // Reset status for next dialog opening
+      
+      // Refresh data by re-fetching
+      // A more direct state update would be better for UX but this is simpler for now
+      const currentPath = router.asPath;
+      router.replace(currentPath, currentPath, { scroll: false });
+
+
+    } catch (err: any) {
+      console.error("Fehler beim Senden der Einheitendaten:", err);
+      alert(`Fehler: ${err.message}`);
+    } finally {
+      setIsSubmittingUnit(false);
+    }
+  };
+
+  const handleAddDocumentSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!propertyData) return;
+
+    setIsSubmittingDocument(true);
+    const formData = new FormData(event.currentTarget);
+    const documentData = {
+      propertyId: propertyData.id,
+      name: formData.get("doc-name") as string,
+      type: formData.get("doc-type") as string,
+      date: formData.get("doc-date") as string,
+    };
+
+    if (!documentData.name || !documentData.type) {
+      alert("Bitte geben Sie Name und Typ des Dokuments an.");
+      setIsSubmittingDocument(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/documents/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(documentData),
+      });
+
+      if (!response.ok) {
+        const errorResult = await response.json();
+        throw new Error(errorResult.error || `Fehler beim Hinzufügen des Dokuments: ${response.statusText}`);
+      }
+      const successResult = await response.json();
+      alert(successResult.message);
+      setAddDocumentDialogOpen(false);
+      // Consider refreshing document list or propertyData if documents are part of it
+      router.replace(router.asPath, undefined, { scroll: false });
+
+
+    } catch (err: any) {
+      console.error("Fehler beim Senden der Dokumentendaten:", err);
+      alert(`Fehler: ${err.message}`);
+    } finally {
+      setIsSubmittingDocument(false);
+    }
+  };
   
-  // Determine which property list to use based on the type
-  const propertyList = type === "hausverwaltung" ? properties.hausverwaltung : properties.wegVerwaltung;
+  if (loading) {
+    return (
+      <div className="bg-background min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 p-6 flex items-center justify-center">
+          <p>Lade Liegenschaftsdetails...</p>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-background min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto">
+            <Link href="/liegenschaften" className="flex items-center text-primary mb-6">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Zurück zur Übersicht
+            </Link>
+            <div className="text-center py-12">
+              <Building className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+              <h1 className="text-2xl font-bold mb-2">Fehler</h1>
+              <p className="text-muted-foreground mb-6">{error}</p>
+              <Button onClick={() => router.push("/liegenschaften")}>
+                Zurück zur Übersicht
+              </Button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
   
-  // Find the property with the matching ID
-  const property = propertyList?.find(p => p.id === id);
-  
-  if (!property) {
+  if (!propertyData) {
     return (
       <div className="bg-background min-h-screen flex flex-col">
         <Header />
@@ -235,11 +337,103 @@ export default function PropertyDetail() {
     );
   }
 
+  const renderAddUnitDialogContent = (formId: string) => (
+    <form onSubmit={handleAddUnitSubmit} id={formId}>
+      <DialogHeader>
+        <DialogTitle>Neue Einheit hinzufügen</DialogTitle>
+        <DialogDescription>
+          Fügen Sie eine neue Einheit zu dieser Liegenschaft hinzu.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor={`${formId}-add-unit-name`} className="text-right">Name*</Label>
+          <Input id={`${formId}-add-unit-name`} name="add-unit-name" placeholder="z.B. Wohnung 3A" className="col-span-3" required />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor={`${formId}-add-unit-area`} className="text-right">Fläche (m²)*</Label>
+          <Input id={`${formId}-add-unit-area`} name="add-unit-area" type="number" step="0.01" placeholder="75" className="col-span-3" required />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor={`${formId}-add-unit-rooms`} className="text-right">Zimmer*</Label>
+          <Input id={`${formId}-add-unit-rooms`} name="add-unit-rooms" type="number" placeholder="3" className="col-span-3" required />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor={`${formId}-add-unit-baseRent`} className="text-right">Kaltmiete (€)</Label>
+          <Input id={`${formId}-add-unit-baseRent`} name="add-unit-baseRent" type="number" step="0.01" placeholder="850" className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor={`${formId}-add-unit-additionalCosts`} className="text-right">Nebenkosten (€)</Label>
+          <Input id={`${formId}-add-unit-additionalCosts`} name="add-unit-additionalCosts" type="number" step="0.01" placeholder="200" className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label className="text-right">Ausstattung</Label>
+          <div className="col-span-3 flex space-x-4">
+            <div className="flex items-center space-x-2">
+              <Input type="checkbox" id={`${formId}-add-unit-hasKitchen`} name="add-unit-hasKitchen" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+              <Label htmlFor={`${formId}-add-unit-hasKitchen`} className="text-sm font-normal">Küche</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Input type="checkbox" id={`${formId}-add-unit-hasBathroom`} name="add-unit-hasBathroom" className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+              <Label htmlFor={`${formId}-add-unit-hasBathroom`} className="text-sm font-normal">Bad</Label>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor={`${formId}-add-unit-status`} className="text-right">Status*</Label>
+          <Select name="add-unit-status" onValueChange={handleUnitDialogStatusChange} value={selectedStatus} required>
+            <SelectTrigger id={`${formId}-add-unit-status`} className="col-span-3">
+              <SelectValue placeholder="Status auswählen" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={UnitStatus.VACANT}>Leerstand</SelectItem>
+              <SelectItem value={UnitStatus.RENTED}>Vermietet</SelectItem>
+              {propertyData.type === "wegVerwaltung" && (
+                <SelectItem value={UnitStatus.SELF_OCCUPIED}>Selbstbewohnt</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+        <div id={`${formId}-tenantFields`} className={`space-y-4 ${selectedStatus === UnitStatus.RENTED ? 'block' : 'hidden'}`}>
+          <Separator className="my-2" />
+          <h4 className="font-medium">Mieterdaten</h4>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor={`${formId}-add-unit-tenantName`} className="text-right">Name</Label>
+            <Input id={`${formId}-add-unit-tenantName`} name="add-unit-tenantName" placeholder="Name des Mieters" className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor={`${formId}-add-unit-tenantEmail`} className="text-right">E-Mail</Label>
+            <Input id={`${formId}-add-unit-tenantEmail`} name="add-unit-tenantEmail" type="email" placeholder="E-Mail-Adresse" className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor={`${formId}-add-unit-tenantPhone`} className="text-right">Telefon</Label>
+            <Input id={`${formId}-add-unit-tenantPhone`} name="add-unit-tenantPhone" placeholder="Telefonnummer" className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor={`${formId}-add-unit-tenantStartDate`} className="text-right">Mietbeginn</Label>
+            <Input id={`${formId}-add-unit-tenantStartDate`} name="add-unit-tenantStartDate" type="date" className="col-span-3" />
+          </div>
+        </div>
+        {propertyData.type === "wegVerwaltung" && (
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor={`${formId}-add-unit-owner`} className="text-right">Eigentümer</Label>
+            <Input id={`${formId}-add-unit-owner`} name="add-unit-owner" placeholder="Name des Eigentümers" className="col-span-3" />
+          </div>
+        )}
+      </div>
+      <DialogFooter>
+        <Button type="submit" disabled={isSubmittingUnit}>
+          {isSubmittingUnit ? "Wird hinzugefügt..." : "Einheit hinzufügen"}
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+
   return (
     <>
       <Head>
-        <title>{property.name} | Immobilienverwaltung</title>
-        <meta name="description" content={`Details zu ${property.name}`} />
+        <title>{propertyData.name} | Immobilienverwaltung</title>
+        <meta name="description" content={`Details zu ${propertyData.name}`} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -256,74 +450,100 @@ export default function PropertyDetail() {
               <div className="md:w-1/3">
                 <div className="aspect-video bg-muted rounded-lg overflow-hidden mb-4">
                   <img 
-                    src={property.image} 
-                    alt={property.name} 
+                    src={propertyData.image || '/images/rect.png'} 
+                    alt={propertyData.name} 
                     className="w-full h-full object-cover"
                   />
                 </div>
               </div>
               
               <div className="md:w-2/3">
-                <h1 className="text-3xl font-bold mb-2">{property.name}</h1>
+                <h1 className="text-3xl font-bold mb-2">{propertyData.name}</h1>
                 <div className="flex items-center text-muted-foreground mb-4">
                   <MapPin className="h-4 w-4 mr-1" />
-                  <span>{property.address}</span>
+                  <span>{propertyData.address}</span>
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div>
                     <p className="text-sm text-muted-foreground">Baujahr</p>
-                    <p className="font-medium">{property.buildYear}</p>
+                    <p className="font-medium">{propertyData.buildYear ?? 'N/A'}</p>
                   </div>
-                  {property.renovationYear && (
+                  {propertyData.renovationYear && (
                     <div>
                       <p className="text-sm text-muted-foreground">Sanierung</p>
-                      <p className="font-medium">{property.renovationYear}</p>
+                      <p className="font-medium">{propertyData.renovationYear}</p>
                     </div>
                   )}
                   <div>
                     <p className="text-sm text-muted-foreground">Einheiten</p>
-                    <p className="font-medium">{property.units}</p>
+                    <p className="font-medium">{stats?.totalUnits ?? '...'}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Gesamtfläche</p>
-                    <p className="font-medium">{property.totalArea} m²</p>
+                    <p className="font-medium">{stats?.totalArea ?? '...'} m²</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {type === "hausverwaltung" ? "Monatliche Miete" : "Hausgeldzahlungen"}
+                      {propertyData.type === "hausverwaltung" ? "Monatliche Miete" : "Hausgeldzahlungen"}
                     </p>
                     <p className="font-medium">
-                      {type === "hausverwaltung" 
-                        ? `${property.monthlyRent} €` 
-                        : `${property.monthlyFee} €`}
+                      {propertyData.type === "hausverwaltung" 
+                        ? `${propertyData.monthlyRent ?? 0} €` 
+                        : `${propertyData.monthlyFee ?? 0} €`}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Verkehrswert</p>
-                    <p className="font-medium">1.850.000 €</p>
+                    <p className="font-medium">1.850.000 €</p> {/* Placeholder */}
                   </div>
-                  {type === "hausverwaltung" ? (
+                  {propertyData.type === "hausverwaltung" ? (
                     <div>
                       <p className="text-sm text-muted-foreground">Rendite</p>
-                      <p className="font-medium">4,2 %</p>
+                      <p className="font-medium">4,2 %</p> {/* Placeholder */}
                     </div>
                   ) : (
                     <div>
                       <p className="text-sm text-muted-foreground">Miteigentumsanteile</p>
-                      <p className="font-medium">1000/1000</p>
+                      <p className="font-medium">1000/1000</p> {/* Placeholder */}
                     </div>
                   )}
-                  {type === "hausverwaltung" && property.owner ? (
+                  {propertyData.type === "hausverwaltung" && propertyData.owner ? (
                     <div>
                       <p className="text-sm text-muted-foreground">Eigentümer</p>
-                      <p className="font-medium">{property.owner}</p>
+                      <p className="font-medium">{propertyData.owner}</p>
                     </div>
-                  ) : type === "wegVerwaltung" && (
+                  ) : propertyData.type === "wegVerwaltung" && (
                     <div>
                       <p className="text-sm text-muted-foreground">Anzahl Eigentümer</p>
-                      <p className="font-medium">{property.units}</p>
+                      <p className="font-medium">{stats?.totalUnits ?? '...'}</p> 
                     </div>
+                  )}
+                   {stats && (
+                    <>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Wohneinheiten</p>
+                        <p className="font-medium">{stats.residentialUnits}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Gewerbeeinheiten</p>
+                        <p className="font-medium">{stats.commercialUnits}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Vermietet</p>
+                        <p className="font-medium">{stats.rentedUnits}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Leerstand</p>
+                        <p className="font-medium">{stats.vacantUnits}</p>
+                      </div>
+                      {propertyData.type === "wegVerwaltung" && (
+                        <div>
+                          <p className="text-sm text-muted-foreground">Selbstbewohnt</p>
+                          <p className="font-medium">{stats.selfOccupiedUnits}</p>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -331,12 +551,12 @@ export default function PropertyDetail() {
             
             <Tabs defaultValue="units" className="w-full">
               <TabsList className="mb-4">
-                <TabsTrigger value="units">Einheiten</TabsTrigger>
+                <TabsTrigger value="units">Einheiten ({stats?.totalUnits ?? '...'})</TabsTrigger>
                 <TabsTrigger value="documents">Dokumente</TabsTrigger>
                 <TabsTrigger value="maintenance">Instandhaltung</TabsTrigger>
                 <TabsTrigger value="finances">Finanzen</TabsTrigger>
                 <TabsTrigger value="statements">Abrechnungen</TabsTrigger>
-                {type === "wegVerwaltung" && (
+                {propertyData.type === "wegVerwaltung" && (
                   <TabsTrigger value="meetings">Versammlungen</TabsTrigger>
                 )}
               </TabsList>
@@ -350,152 +570,22 @@ export default function PropertyDetail() {
                         Übersicht aller Einheiten in dieser Liegenschaft
                       </CardDescription>
                     </div>
-                    <Dialog>
+                    <Dialog open={addUnitDialogOpen} onOpenChange={setAddUnitDialogOpen}>
                       <DialogTrigger asChild>
-                        <Button className="gap-1">
-                          <Plus className="h-4 w-4" /> Einheit hinzufügen
+                        <Button className="gap-1" onClick={() => setAddUnitDialogOpen(true)} disabled={isSubmittingUnit}>
+                          <Plus className="h-4 w-4" /> {isSubmittingUnit ? "Wird hinzugefügt..." : "Einheit hinzufügen"}
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Neue Einheit hinzufügen</DialogTitle>
-                          <DialogDescription>
-                            Fügen Sie eine neue Einheit zu dieser Liegenschaft hinzu.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="name" className="text-right">
-                              Name
-                            </Label>
-                            <Input id="name" placeholder="z.B. Wohnung 3A" className="col-span-3" />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="area" className="text-right">
-                              Fläche (m²)
-                            </Label>
-                            <Input id="area" type="number" placeholder="75" className="col-span-3" />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="rooms" className="text-right">
-                              Zimmer
-                            </Label>
-                            <Input id="rooms" type="number" placeholder="3" className="col-span-3" />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="baseRent" className="text-right">
-                              Kaltmiete (€)
-                            </Label>
-                            <Input id="baseRent" type="number" placeholder="850" className="col-span-3" />
-                          </div>
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="additionalCosts" className="text-right">
-                              Nebenkosten (€)
-                            </Label>
-                            <Input id="additionalCosts" type="number" placeholder="200" className="col-span-3" />
-                          </div>
-                          
-                          {/* Ausstattung: Küche und Bad */}
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label className="text-right">
-                              Ausstattung
-                            </Label>
-                            <div className="col-span-3 flex space-x-4">
-                              <div className="flex items-center space-x-2">
-                                <input
-                                  type="checkbox"
-                                  id="hasKitchen"
-                                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                                />
-                                <Label htmlFor="hasKitchen" className="text-sm font-normal">
-                                  Küche
-                                </Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <input
-                                  type="checkbox"
-                                  id="hasBathroom"
-                                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                                />
-                                <Label htmlFor="hasBathroom" className="text-sm font-normal">
-                                  Bad
-                                </Label>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="status" className="text-right">
-                              Status
-                            </Label>
-                            <Select id="status" onValueChange={handleStatusChange}>
-                              <SelectTrigger className="col-span-3">
-                                <SelectValue placeholder="Status auswählen" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="vacant">Leerstand</SelectItem>
-                                <SelectItem value="rented">Vermietet</SelectItem>
-                                {type === "wegVerwaltung" && (
-                                  <SelectItem value="self-occupied">Selbstbewohnt</SelectItem>
-                                )}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          {/* Conditional tenant fields */}
-                          <div id="tenantFields" className={`space-y-4 ${selectedStatus === 'rented' ? 'block' : 'hidden'}`}>
-                            <Separator className="my-2" />
-                            <h4 className="font-medium">Mieterdaten</h4>
-                            
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="tenantName" className="text-right">
-                                Name
-                              </Label>
-                              <Input id="tenantName" placeholder="Name des Mieters" className="col-span-3" />
-                            </div>
-                            
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="tenantEmail" className="text-right">
-                                E-Mail
-                              </Label>
-                              <Input id="tenantEmail" type="email" placeholder="E-Mail-Adresse" className="col-span-3" />
-                            </div>
-                            
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="tenantPhone" className="text-right">
-                                Telefon
-                              </Label>
-                              <Input id="tenantPhone" placeholder="Telefonnummer" className="col-span-3" />
-                            </div>
-                            
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="tenantStartDate" className="text-right">
-                                Mietbeginn
-                              </Label>
-                              <Input id="tenantStartDate" type="date" className="col-span-3" />
-                            </div>
-                          </div>
-                          
-                          {type === "wegVerwaltung" && (
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="owner" className="text-right">
-                                Eigentümer
-                              </Label>
-                              <Input id="owner" placeholder="Name des Eigentümers" className="col-span-3" />
-                            </div>
-                          )}
-                        </div>
-                        <DialogFooter>
-                          <Button type="submit">Einheit hinzufügen</Button>
-                        </DialogFooter>
+                        {renderAddUnitDialogContent("dialog-form-1")}
                       </DialogContent>
                     </Dialog>
                   </CardHeader>
                   <CardContent>
-                    {property.units_list.length > 0 ? (
+                    {propertyData.units_list && propertyData.units_list.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {property.units_list
-                          .slice() // Create a copy to avoid mutating the original array
+                        {propertyData.units_list
+                          .slice() 
                           .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }))
                           .map((unit) => (
                           <Card 
@@ -503,7 +593,7 @@ export default function PropertyDetail() {
                             className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                             onClick={() => router.push({
                               pathname: `/liegenschaften/${id}/units/${unit.id}`,
-                              query: { type }
+                              query: { type: propertyData.type }
                             })}
                           >
                             <CardHeader className="pb-2">
@@ -514,7 +604,7 @@ export default function PropertyDetail() {
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-2">
-                                {type === "wegVerwaltung" ? (
+                                {propertyData.type === "wegVerwaltung" ? (
                                   <>
                                     <div className="flex justify-between">
                                       <span className="text-sm text-muted-foreground">Mieter</span>
@@ -522,7 +612,7 @@ export default function PropertyDetail() {
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-sm text-muted-foreground">Kaltmiete</span>
-                                      <span className="text-sm font-medium">{unit.baseRent} €</span>
+                                      <span className="text-sm font-medium">{unit.baseRent > 0 ? `${unit.baseRent} €` : "—"}</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-sm text-muted-foreground">Nebenkosten</span>
@@ -539,19 +629,19 @@ export default function PropertyDetail() {
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-sm text-muted-foreground">Miteigentumsanteile</span>
-                                      <span className="text-sm font-medium">-</span>
+                                      <span className="text-sm font-medium">-</span> {/* Placeholder */}
                                     </div>
                                   </>
-                                ) : (
+                                ) : ( 
                                   <>
                                     <div className="flex justify-between">
                                       <span className="text-sm text-muted-foreground">Status</span>
                                       <span className={`text-sm font-medium ${
                                         unit.status === "vacant" 
-                                          ? "text-red-500" 
+                                          ? "text-destructive" 
                                           : unit.status === "self-occupied" 
                                             ? "text-blue-500" 
-                                            : "text-green-500"
+                                            : "text-green-500" 
                                       }`}>
                                         {unit.status === "vacant" 
                                           ? "Leerstand" 
@@ -588,79 +678,14 @@ export default function PropertyDetail() {
                       <div className="text-center py-8">
                         <Home className="h-12 w-12 mx-auto text-muted-foreground" />
                         <p className="mt-4 text-muted-foreground">Keine Einheiten vorhanden</p>
-                        <Dialog>
+                        <Dialog open={addUnitDialogOpen} onOpenChange={setAddUnitDialogOpen}>
                           <DialogTrigger asChild>
-                            <Button className="mt-4 gap-1">
-                              <Plus className="h-4 w-4" /> Einheit hinzufügen
+                            <Button className="mt-4 gap-1" onClick={() => setAddUnitDialogOpen(true)} disabled={isSubmittingUnit}>
+                             <Plus className="h-4 w-4" /> {isSubmittingUnit ? "Wird hinzugefügt..." : "Einheit hinzufügen"}
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Neue Einheit hinzufügen</DialogTitle>
-                              <DialogDescription>
-                                Fügen Sie eine neue Einheit zu dieser Liegenschaft hinzu.
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="grid gap-4 py-4">
-                              <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="name" className="text-right">
-                                  Name
-                                </Label>
-                                <Input id="name" placeholder="z.B. Wohnung 3A" className="col-span-3" />
-                              </div>
-                              <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="area" className="text-right">
-                                  Fläche (m²)
-                                </Label>
-                                <Input id="area" type="number" placeholder="75" className="col-span-3" />
-                              </div>
-                              <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="rooms" className="text-right">
-                                  Zimmer
-                                </Label>
-                                <Input id="rooms" type="number" placeholder="3" className="col-span-3" />
-                              </div>
-                              <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="baseRent" className="text-right">
-                                  Kaltmiete (€)
-                                </Label>
-                                <Input id="baseRent" type="number" placeholder="850" className="col-span-3" />
-                              </div>
-                              <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="additionalCosts" className="text-right">
-                                  Nebenkosten (€)
-                                </Label>
-                                <Input id="additionalCosts" type="number" placeholder="200" className="col-span-3" />
-                              </div>
-                              <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="status" className="text-right">
-                                  Status
-                                </Label>
-                                <Select>
-                                  <SelectTrigger className="col-span-3">
-                                    <SelectValue placeholder="Status auswählen" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="vacant">Leerstand</SelectItem>
-                                    <SelectItem value="rented">Vermietet</SelectItem>
-                                    {type === "wegVerwaltung" && (
-                                      <SelectItem value="self-occupied">Selbstbewohnt</SelectItem>
-                                    )}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              {type === "wegVerwaltung" && (
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="owner" className="text-right">
-                                    Eigentümer
-                                  </Label>
-                                  <Input id="owner" placeholder="Name des Eigentümers" className="col-span-3" />
-                                </div>
-                              )}
-                            </div>
-                            <DialogFooter>
-                              <Button type="submit">Einheit hinzufügen</Button>
-                            </DialogFooter>
+                          <DialogContent> 
+                           {renderAddUnitDialogContent("dialog-form-2")}
                           </DialogContent>
                         </Dialog>
                       </div>
@@ -679,7 +704,48 @@ export default function PropertyDetail() {
                     <div className="text-center py-8">
                       <Calendar className="h-12 w-12 mx-auto text-muted-foreground" />
                       <p className="mt-4 text-muted-foreground">Keine Dokumente vorhanden</p>
-                      <Button className="mt-4">Dokument hinzufügen</Button>
+                      <Dialog open={addDocumentDialogOpen} onOpenChange={setAddDocumentDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button className="mt-4" onClick={() => setAddDocumentDialogOpen(true)} disabled={isSubmittingDocument}>
+                            {isSubmittingDocument ? "Wird hinzugefügt..." : "Dokument hinzufügen"}
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <form onSubmit={handleAddDocumentSubmit}>
+                            <DialogHeader>
+                              <DialogTitle>Neues Dokument hinzufügen</DialogTitle>
+                              <DialogDescription>
+                                Fügen Sie Metadaten für ein neues Dokument hinzu. Der Datei-Upload wird hier nicht behandelt.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="doc-name" className="text-right">Name*</Label>
+                                <Input id="doc-name" name="doc-name" placeholder="z.B. Mietvertrag Wohnung 1A" className="col-span-3" required />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="doc-type" className="text-right">Typ/Kategorie*</Label>
+                                <Input id="doc-type" name="doc-type" placeholder="z.B. Mietvertrag, Protokoll" className="col-span-3" required />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="doc-date" className="text-right">Datum</Label>
+                                <Input id="doc-date" name="doc-date" type="date" className="col-span-3" />
+                              </div>
+                              {/* Placeholder for file input if we were to handle uploads client-side
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="doc-file" className="text-right">Datei</Label>
+                                <Input id="doc-file" name="doc-file" type="file" className="col-span-3" />
+                              </div>
+                              */}
+                            </div>
+                            <DialogFooter>
+                              <Button type="submit" disabled={isSubmittingDocument}>
+                                {isSubmittingDocument ? "Wird hinzugefügt..." : "Dokumentmetadaten hinzufügen"}
+                              </Button>
+                            </DialogFooter>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </CardContent>
                 </Card>
@@ -697,7 +763,7 @@ export default function PropertyDetail() {
                       <p className="mt-4 text-muted-foreground">Keine Instandhaltungsmaßnahmen vorhanden</p>
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button className="mt-4">Maßnahme hinzufügen</Button>
+                          <Button className="mt-4" onClick={() => alert("TODO: Implement add maintenance functionality")}>Maßnahme hinzufügen</Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
@@ -765,7 +831,7 @@ export default function PropertyDetail() {
                             </div>
                           </div>
                           <DialogFooter>
-                            <Button type="submit">Maßnahme hinzufügen</Button>
+                            <Button type="submit" onClick={() => alert("TODO: Implement add maintenance functionality")}>Maßnahme hinzufügen</Button>
                           </DialogFooter>
                         </DialogContent>
                       </Dialog>
@@ -786,15 +852,15 @@ export default function PropertyDetail() {
                         <div className="grid grid-cols-2 gap-4">
                           <div className="bg-muted p-4 rounded-lg">
                             <p className="text-sm text-muted-foreground mb-1">Monatliche Einnahmen</p>
-                            <p className="text-2xl font-bold text-green-500">
-                              {type === "hausverwaltung" 
-                                ? `${property.monthlyRent} €` 
-                                : `${property.monthlyFee} €`}
+                            <p className="text-2xl font-bold text-green-500"> 
+                              {propertyData.type === "hausverwaltung" 
+                                ? `${propertyData.monthlyRent ?? 0} €` 
+                                : `${propertyData.monthlyFee ?? 0} €`}
                             </p>
                           </div>
                           <div className="bg-muted p-4 rounded-lg">
                             <p className="text-sm text-muted-foreground mb-1">Offene Forderungen</p>
-                            <p className="text-2xl font-bold text-red-500">1.250 €</p>
+                            <p className="text-2xl font-bold text-red-500">1.250 €</p> {/* Placeholder */}
                           </div>
                         </div>
                         
@@ -804,7 +870,7 @@ export default function PropertyDetail() {
                             <Table>
                               <TableHeader>
                                 <TableRow>
-                                  {type === "wegVerwaltung" ? (
+                                  {propertyData.type === "wegVerwaltung" ? (
                                     <>
                                       <TableHead>Einheit</TableHead>
                                       <TableHead>Miteigentumsanteile</TableHead>
@@ -822,12 +888,12 @@ export default function PropertyDetail() {
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
-                                {property.units_list.map((unit) => (
+                                {propertyData.units_list.map((unit) => (
                                   <TableRow key={unit.id}>
-                                    {type === "wegVerwaltung" ? (
+                                    {propertyData.type === "wegVerwaltung" ? (
                                       <>
                                         <TableCell className="font-medium">{unit.name}</TableCell>
-                                        <TableCell>-</TableCell>
+                                        <TableCell>-</TableCell> 
                                         <TableCell>{unit.additionalCosts} €</TableCell>
                                         <TableCell>{unit.owner}</TableCell>
                                       </>
@@ -842,12 +908,12 @@ export default function PropertyDetail() {
                                   </TableRow>
                                 ))}
                                 <TableRow>
-                                  {type === "wegVerwaltung" ? (
+                                  {propertyData.type === "wegVerwaltung" ? (
                                     <>
                                       <TableCell className="font-bold">Gesamt</TableCell>
-                                      <TableCell className="font-bold">1000/1000</TableCell>
+                                      <TableCell className="font-bold">1000/1000</TableCell> 
                                       <TableCell className="font-bold">
-                                        {property.units_list.reduce((sum, unit) => sum + unit.additionalCosts, 0)} €
+                                        {propertyData.units_list.reduce((sum, unit) => sum + unit.additionalCosts, 0)} €
                                       </TableCell>
                                       <TableCell></TableCell>
                                     </>
@@ -855,13 +921,13 @@ export default function PropertyDetail() {
                                     <>
                                       <TableCell className="font-bold">Gesamt</TableCell>
                                       <TableCell className="font-bold">
-                                        {property.units_list.reduce((sum, unit) => sum + unit.baseRent, 0)} €
+                                        {propertyData.units_list.reduce((sum, unit) => sum + unit.baseRent, 0)} €
                                       </TableCell>
                                       <TableCell className="font-bold">
-                                        {property.units_list.reduce((sum, unit) => sum + unit.additionalCosts, 0)} €
+                                        {propertyData.units_list.reduce((sum, unit) => sum + unit.additionalCosts, 0)} €
                                       </TableCell>
                                       <TableCell className="font-bold">
-                                        {property.units_list.reduce((sum, unit) => sum + unit.baseRent + unit.additionalCosts, 0)} €
+                                        {propertyData.units_list.reduce((sum, unit) => sum + unit.baseRent + unit.additionalCosts, 0)} €
                                       </TableCell>
                                     </>
                                   )}
@@ -882,7 +948,7 @@ export default function PropertyDetail() {
                       </div>
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button size="sm">
+                          <Button size="sm" onClick={() => alert("TODO: Implement add transaction functionality")}>
                             <Plus className="mr-2 h-4 w-4" />
                             Buchung hinzufügen
                           </Button>
@@ -896,11 +962,11 @@ export default function PropertyDetail() {
                           </DialogHeader>
                           <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="transaction-type" className="text-right">
+                              <Label htmlFor="transaction-type-dialog" className="text-right">
                                 Buchungstyp
                               </Label>
-                              <Select defaultValue="expense">
-                                <SelectTrigger className="col-span-3">
+                              <Select defaultValue="expense" onValueChange={handleTransactionTypeChange}>
+                                <SelectTrigger id="transaction-type-dialog" className="col-span-3">
                                   <SelectValue placeholder="Buchungstyp auswählen" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -910,56 +976,55 @@ export default function PropertyDetail() {
                               </Select>
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="invoice-number" className="text-right">
+                              <Label htmlFor="invoice-number-dialog" className="text-right">
                                 Rechnungsnummer
                               </Label>
                               <Input
-                                id="invoice-number"
+                                id="invoice-number-dialog"
                                 placeholder="z.B. RE-12345"
                                 className="col-span-3"
                               />
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="invoice-date" className="text-right">
+                              <Label htmlFor="invoice-date-dialog" className="text-right">
                                 Rechnungsdatum
                               </Label>
                               <Input
-                                id="invoice-date"
+                                id="invoice-date-dialog"
                                 type="date"
                                 className="col-span-3"
                               />
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="invoice-amount" className="text-right">
+                              <Label htmlFor="invoice-amount-dialog" className="text-right">
                                 Betrag (€)
                               </Label>
                               <Input
-                                id="invoice-amount"
+                                id="invoice-amount-dialog"
                                 type="number"
                                 placeholder="0.00"
                                 className="col-span-3"
                               />
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="invoice-vendor" className="text-right">
+                              <Label htmlFor="invoice-vendor-dialog" className="text-right">
                                 Dienstleister
                               </Label>
                               <Input
-                                id="invoice-vendor"
+                                id="invoice-vendor-dialog"
                                 placeholder="Name des Dienstleisters"
                                 className="col-span-3"
                               />
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="invoice-category" className="text-right">
+                              <Label htmlFor="invoice-category-dialog" className="text-right">
                                 Kategorie
                               </Label>
                               <Select>
-                                <SelectTrigger className="col-span-3">
+                                <SelectTrigger id="invoice-category-dialog" className="col-span-3">
                                   <SelectValue placeholder="Kategorie auswählen" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {/* Conditional categories based on transaction type */}
                                   {selectedTransactionType === "expense" ? (
                                     <>
                                       <SelectItem value="allocatable">umlegbar</SelectItem>
@@ -976,18 +1041,18 @@ export default function PropertyDetail() {
                               </Select>
                             </div>
                             <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="invoice-notes" className="text-right">
+                              <Label htmlFor="invoice-notes-dialog" className="text-right">
                                 Notizen
                               </Label>
                               <Textarea
-                                id="invoice-notes"
+                                id="invoice-notes-dialog"
                                 placeholder="Zusätzliche Informationen"
                                 className="col-span-3"
                               />
                             </div>
                           </div>
                           <DialogFooter>
-                            <Button type="submit">Buchung hinzufügen</Button>
+                            <Button type="submit" onClick={() => alert("TODO: Implement add transaction functionality")}>Buchung hinzufügen</Button>
                           </DialogFooter>
                         </DialogContent>
                       </Dialog>
@@ -998,25 +1063,25 @@ export default function PropertyDetail() {
                         <p className="mt-4 text-muted-foreground">Keine Rechnungen vorhanden</p>
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button className="mt-4">
+                            <Button className="mt-4" onClick={() => alert("TODO: Implement add transaction functionality")}>
                               <Plus className="mr-2 h-4 w-4" />
                               Buchung hinzufügen
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
+                           <DialogContent> 
                             <DialogHeader>
                               <DialogTitle>Neue Buchung hinzufügen</DialogTitle>
                               <DialogDescription>
                                 Fügen Sie eine neue Buchung für diese Liegenschaft hinzu.
                               </DialogDescription>
                             </DialogHeader>
-                            <div className="grid gap-4 py-4">
+                            <div className="grid gap-4 py-4"> 
                               <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="transaction-type" className="text-right">
+                              <Label htmlFor="transaction-type-dialog-2" className="text-right">
                                 Buchungstyp
                               </Label>
-                              <Select defaultValue="expense">
-                                <SelectTrigger className="col-span-3">
+                              <Select defaultValue="expense" onValueChange={handleTransactionTypeChange}>
+                                <SelectTrigger id="transaction-type-dialog-2" className="col-span-3">
                                   <SelectValue placeholder="Buchungstyp auswählen" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1026,49 +1091,49 @@ export default function PropertyDetail() {
                               </Select>
                             </div>
                               <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="invoice-number" className="text-right">
+                                <Label htmlFor="invoice-number-dialog-2" className="text-right">
                                   Rechnungsnummer
                                 </Label>
                                 <Input
-                                  id="invoice-number"
+                                  id="invoice-number-dialog-2"
                                   placeholder="z.B. RE-12345"
                                   className="col-span-3"
                                 />
                               </div>
-                              <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="invoice-date" className="text-right">
+                               <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="invoice-date-dialog-2" className="text-right">
                                   Rechnungsdatum
                                 </Label>
                                 <Input
-                                  id="invoice-date"
+                                  id="invoice-date-dialog-2"
                                   type="date"
                                   className="col-span-3"
                                 />
                               </div>
                               <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="invoice-amount" className="text-right">
+                                <Label htmlFor="invoice-amount-dialog-2" className="text-right">
                                   Betrag (€)
                                 </Label>
                                 <Input
-                                  id="invoice-amount"
+                                  id="invoice-amount-dialog-2"
                                   type="number"
                                   placeholder="0.00"
                                   className="col-span-3"
                                 />
                               </div>
                               <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="invoice-vendor" className="text-right">
+                                <Label htmlFor="invoice-vendor-dialog-2" className="text-right">
                                   Dienstleister
                                 </Label>
                                 <Input
-                                  id="invoice-vendor"
+                                  id="invoice-vendor-dialog-2"
                                   placeholder="Name des Dienstleisters"
                                   className="col-span-3"
                                 />
                               </div>
                             </div>
                             <DialogFooter>
-                              <Button type="submit">Buchung hinzufügen</Button>
+                              <Button type="submit" onClick={() => alert("TODO: Implement add transaction functionality")}>Buchung hinzufügen</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
@@ -1080,9 +1145,9 @@ export default function PropertyDetail() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle>{type === "wegVerwaltung" ? "Hausgeldeingänge" : "Mieteingänge"}</CardTitle>
+                      <CardTitle>{propertyData.type === "wegVerwaltung" ? "Hausgeldeingänge" : "Mieteingänge"}</CardTitle>
                       <CardDescription>
-                        {type === "wegVerwaltung" 
+                        {propertyData.type === "wegVerwaltung" 
                           ? "Übersicht der Hausgeldeingänge nach Einheiten" 
                           : "Übersicht der Mieteingänge nach Einheiten"}
                       </CardDescription>
@@ -1094,7 +1159,7 @@ export default function PropertyDetail() {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Einheit</TableHead>
-                            {type === "wegVerwaltung" ? (
+                            {propertyData.type === "wegVerwaltung" ? (
                               <TableHead>Eigentümer</TableHead>
                             ) : (
                               <TableHead>Mieter</TableHead>
@@ -1106,43 +1171,41 @@ export default function PropertyDetail() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {type === "wegVerwaltung" ? (
-                            // For WEG-Verwaltung, show all units with their owners
-                            property.units_list.map((unit) => (
+                          {propertyData.type === "wegVerwaltung" ? (
+                            propertyData.units_list.map((unit) => (
                               <TableRow key={unit.id}>
                                 <TableCell className="font-medium">{unit.name}</TableCell>
                                 <TableCell>{unit.owner}</TableCell>
                                 <TableCell>{unit.additionalCosts} €</TableCell>
-                                <TableCell>01.04.2025</TableCell>
+                                <TableCell>01.04.2025</TableCell> 
                                 <TableCell>
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"> 
                                     Ausstehend
                                   </span>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                  <Button variant="outline" size="sm">
+                                  <Button variant="outline" size="sm" onClick={() => alert("TODO: Implement payment status update")}>
                                     Als bezahlt markieren
                                   </Button>
                                 </TableCell>
                               </TableRow>
                             ))
                           ) : (
-                            // For Hausverwaltung, show only rented units with their tenants
-                            property.units_list
+                            propertyData.units_list
                               .filter(unit => unit.status === "rented")
                               .map((unit) => (
                                 <TableRow key={unit.id}>
                                   <TableCell className="font-medium">{unit.name}</TableCell>
                                   <TableCell>{unit.tenant}</TableCell>
                                   <TableCell>{unit.baseRent + unit.additionalCosts} €</TableCell>
-                                  <TableCell>01.04.2025</TableCell>
+                                  <TableCell>01.04.2025</TableCell> 
                                   <TableCell>
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"> 
                                       Ausstehend
                                     </span>
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    <Button variant="outline" size="sm">
+                                    <Button variant="outline" size="sm" onClick={() => alert("TODO: Implement payment status update")}>
                                       Als bezahlt markieren
                                     </Button>
                                   </TableCell>
@@ -1165,7 +1228,7 @@ export default function PropertyDetail() {
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button className="gap-1">
+                        <Button className="gap-1" onClick={() => alert("TODO: Implement create statement functionality")}>
                           <Plus className="h-4 w-4" /> Abrechnung erstellen
                         </Button>
                       </DialogTrigger>
@@ -1176,7 +1239,7 @@ export default function PropertyDetail() {
                             Erstellen Sie eine neue Abrechnung für diese Liegenschaft.
                           </DialogDescription>
                         </DialogHeader>
-                        <form id="create-statement-form">
+                        <form id="create-statement-form"> 
                           <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                               <Label htmlFor="statement-type" className="text-right">
@@ -1190,6 +1253,9 @@ export default function PropertyDetail() {
                                   <SelectItem value="owner">Eigentümerabrechnung</SelectItem>
                                   <SelectItem value="utilities">Nebenkostenabrechnung</SelectItem>
                                   <SelectItem value="profit-loss">Gewinn- und Verlustrechnung (GUV)</SelectItem>
+                                  {propertyData.type === "wegVerwaltung" && (
+                                    <SelectItem value="wirtschaftsplan">Wirtschaftsplan</SelectItem>
+                                  )}
                                   <SelectItem value="other">Sonstige Abrechnung</SelectItem>
                                 </SelectContent>
                               </Select>
@@ -1238,7 +1304,6 @@ export default function PropertyDetail() {
                               />
                             </div>
                             
-                            {/* Nebenkostenabrechnung specific fields */}
                             <div className="mt-4 mb-2">
                               <h3 className="text-lg font-medium">Kostenpositionen</h3>
                               <p className="text-sm text-muted-foreground">Fügen Sie die Kostenpositionen für die Nebenkostenabrechnung hinzu.</p>
@@ -1346,11 +1411,9 @@ export default function PropertyDetail() {
                                 const form = document.getElementById('create-statement-form') as HTMLFormElement;
                                 const formData = new FormData(form);
                                 
-                                // Extract cost categories
                                 const costCategories: any[] = [];
                                 const entries = Array.from(formData.entries());
                                 
-                                // Group entries by index
                                 const categoryEntries = entries.filter(([key]) => key.startsWith('costCategory'));
                                 const indices = new Set<number>();
                                 
@@ -1361,7 +1424,6 @@ export default function PropertyDetail() {
                                   }
                                 });
                                 
-                                // Create cost category objects
                                 indices.forEach(index => {
                                   const name = formData.get(`costCategory[${index}].name`) as string;
                                   const amount = parseFloat(formData.get(`costCategory[${index}].amount`) as string);
@@ -1402,8 +1464,7 @@ export default function PropertyDetail() {
                                   
                                   if (result.success) {
                                     alert('Nebenkostenabrechnung wurde erfolgreich erstellt!');
-                                    // Close dialog and reset form
-                                    const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]');
+                                    const closeButton = document.querySelector('#create-statement-form button[aria-label="Close"]'); // More specific close
                                     if (closeButton) {
                                       (closeButton as HTMLButtonElement).click();
                                     }
@@ -1429,7 +1490,7 @@ export default function PropertyDetail() {
                       <p className="mt-4 text-muted-foreground">Keine Abrechnungen vorhanden</p>
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button className="mt-4 gap-1">
+                          <Button className="mt-4 gap-1" onClick={() => alert("TODO: Implement create statement functionality")}>
                             <Plus className="h-4 w-4" /> Abrechnung erstellen
                           </Button>
                         </DialogTrigger>
@@ -1440,7 +1501,7 @@ export default function PropertyDetail() {
                               Erstellen Sie eine neue Abrechnung für diese Liegenschaft.
                             </DialogDescription>
                           </DialogHeader>
-                          <form id="create-statement-form-2">
+                          <form id="create-statement-form-2"> 
                             <div className="grid gap-4 py-4">
                               <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="statement-type-2" className="text-right">
@@ -1454,7 +1515,7 @@ export default function PropertyDetail() {
                                     <SelectItem value="owner">Eigentümerabrechnung</SelectItem>
                                     <SelectItem value="utilities">Nebenkostenabrechnung</SelectItem>
                                     <SelectItem value="profit-loss">Gewinn- und Verlustrechnung (GUV)</SelectItem>
-                                    {type === "wegVerwaltung" && (
+                                    {propertyData.type === "wegVerwaltung" && (
                                       <SelectItem value="wirtschaftsplan">Wirtschaftsplan</SelectItem>
                                     )}
                                     <SelectItem value="other">Sonstige Abrechnung</SelectItem>
@@ -1505,7 +1566,6 @@ export default function PropertyDetail() {
                                 />
                               </div>
                               
-                              {/* Nebenkostenabrechnung specific fields */}
                               <div className="mt-4 mb-2">
                                 <h3 className="text-lg font-medium">Kostenpositionen</h3>
                                 <p className="text-sm text-muted-foreground">Fügen Sie die Kostenpositionen für die Nebenkostenabrechnung hinzu.</p>
@@ -1613,11 +1673,9 @@ export default function PropertyDetail() {
                                   const form = document.getElementById('create-statement-form-2') as HTMLFormElement;
                                   const formData = new FormData(form);
                                   
-                                  // Extract cost categories
                                   const costCategories: any[] = [];
                                   const entries = Array.from(formData.entries());
                                   
-                                  // Group entries by index
                                   const categoryEntries = entries.filter(([key]) => key.startsWith('costCategory'));
                                   const indices = new Set<number>();
                                   
@@ -1628,7 +1686,6 @@ export default function PropertyDetail() {
                                     }
                                   });
                                   
-                                  // Create cost category objects
                                   indices.forEach(index => {
                                     const name = formData.get(`costCategory[${index}].name`) as string;
                                     const amount = parseFloat(formData.get(`costCategory[${index}].amount`) as string);
@@ -1669,8 +1726,7 @@ export default function PropertyDetail() {
                                     
                                     if (result.success) {
                                       alert('Nebenkostenabrechnung wurde erfolgreich erstellt!');
-                                      // Close dialog and reset form
-                                      const closeButton = document.querySelector('[data-state="open"] button[aria-label="Close"]');
+                                      const closeButton = document.querySelector('#create-statement-form-2 button[aria-label="Close"]'); // More specific close
                                       if (closeButton) {
                                         (closeButton as HTMLButtonElement).click();
                                       }
@@ -1694,7 +1750,7 @@ export default function PropertyDetail() {
                 </Card>
               </TabsContent>
               
-              {type === "wegVerwaltung" && (
+              {propertyData.type === "wegVerwaltung" && (
                 <TabsContent value="meetings">
                   <Card>
                     <CardHeader>
@@ -1705,7 +1761,7 @@ export default function PropertyDetail() {
                       <div className="text-center py-8">
                         <Users className="h-12 w-12 mx-auto text-muted-foreground" />
                         <p className="mt-4 text-muted-foreground">Keine Versammlungen vorhanden</p>
-                        <Button className="mt-4">Versammlung hinzufügen</Button>
+                        <Button className="mt-4" onClick={() => alert("TODO: Implement add meeting functionality")}>Versammlung hinzufügen</Button>
                       </div>
                     </CardContent>
                   </Card>
